@@ -145,5 +145,132 @@
     });
   }, 1200);
 </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, doc, updateDoc, deleteDoc, addDoc, collection, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ⏳ Wait till cart items render
+  setTimeout(() => {
+    document.querySelectorAll(".item").forEach(item => {
+      if (item.dataset.enhanced) return;
+      item.dataset.enhanced = "yes";
+
+      const user = auth.currentUser;
+      if (!user) return;
+
+      // 🔎 Try to find product id safely
+      const docId = item.getAttribute("data-id");
+      if (!docId) return;
+
+      // 🔢 Read qty from text
+      const qtyMatch = item.innerText.match(/Qty[:\s]+(\d+)/);
+      let qty = qtyMatch ? Number(qtyMatch[1]) : 1;
+
+      /* =====================
+         A) QUANTITY + / −
+         ===================== */
+      const qtyBox = document.createElement("div");
+      qtyBox.style.marginTop = "6px";
+      qtyBox.innerHTML = `
+        <button data-act="minus">−</button>
+        <span style="margin:0 10px">${qty}</span>
+        <button data-act="plus">+</button>
+      `;
+      item.appendChild(qtyBox);
+
+      qtyBox.addEventListener("click", async (e) => {
+        const act = e.target.dataset.act;
+        if (!act) return;
+
+        let newQty = qty;
+        if (act === "plus") newQty++;
+        if (act === "minus" && qty > 1) newQty--;
+
+        await updateDoc(doc(db, "carts", user.uid, "items", docId), {
+          qty: newQty
+        });
+        location.reload();
+      });
+
+      /* =====================
+         B) REMOVE ITEM
+         ===================== */
+      const removeBtn = document.createElement("button");
+      removeBtn.innerText = "🗑️ Remove";
+      removeBtn.style.cssText = `
+        margin-top:8px;
+        background:#ff3f6c;
+        color:#fff;
+        border:none;
+        padding:6px 10px;
+        border-radius:6px;
+        cursor:pointer;
+        font-size:13px;
+      `;
+      item.appendChild(removeBtn);
+
+      removeBtn.onclick = async () => {
+        if (!confirm("Remove item from cart?")) return;
+        await deleteDoc(doc(db, "carts", user.uid, "items", docId));
+        location.reload();
+      };
+
+      /* =====================
+         C) BUY NOW
+         ===================== */
+      const buyBtn = document.createElement("button");
+      buyBtn.innerText = "⚡ Buy Now";
+      buyBtn.style.cssText = `
+        margin-top:6px;
+        background:#fb641b;
+        color:#fff;
+        border:none;
+        padding:8px 12px;
+        border-radius:6px;
+        cursor:pointer;
+        font-size:14px;
+        display:block;
+      `;
+      item.appendChild(buyBtn);
+
+      buyBtn.onclick = async () => {
+        const name = item.innerText.split("\n")[0] || "Product";
+        const priceMatch = item.innerText.match(/₹(\d+)/);
+        const price = priceMatch ? Number(priceMatch[1]) : 0;
+
+        await addDoc(collection(db, "orders"), {
+          uid: user.uid,
+          productId: docId,
+          name,
+          price,
+          qty,
+          status: "Placed",
+          createdAt: serverTimestamp()
+        });
+
+        // remove from cart after order
+        await deleteDoc(doc(db, "carts", user.uid, "items", docId));
+
+        alert("Order placed successfully");
+        location.href = "orders.html";
+      };
+    });
+  }, 1200);
+  </script>
 </body>
 </html>
