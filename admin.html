@@ -214,5 +214,78 @@
     });
   }, 1200);
     </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // UI box
+  const box = document.createElement("div");
+  box.className = "box";
+  box.innerHTML = `
+    <h3>Home Banners</h3>
+    <input id="bannerImg" placeholder="Banner Image URL">
+    <input id="bannerLink" placeholder="Click Link (optional)">
+    <button id="addBanner">Add Banner</button>
+    <div id="bannerList"></div>
+  `;
+  document.body.appendChild(box);
+
+  // Add banner
+  document.getElementById("addBanner").onclick = async () => {
+    const image = bannerImg.value.trim();
+    if (!image) return alert("Image URL required");
+
+    await addDoc(collection(db, "banners"), {
+      image,
+      link: bannerLink.value || "",
+      active: true,
+      createdAt: serverTimestamp()
+    });
+
+    alert("Banner added");
+    location.reload();
+  };
+
+  // Load banners
+  const list = document.getElementById("bannerList");
+  const snap = await getDocs(collection(db, "banners"));
+
+  snap.forEach(d => {
+    list.innerHTML += `
+      <div style="margin-top:8px">
+        <img src="${d.data().image}" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px">
+        <button data-id="${d.id}" style="
+          margin-top:6px;
+          background:#d32f2f;
+          color:#fff;
+          border:none;
+          padding:6px 10px;
+          border-radius:6px;
+          cursor:pointer;
+        ">Delete</button>
+      </div>
+    `;
+  });
+
+  list.onclick = async (e) => {
+    if (!e.target.dataset.id) return;
+    if (!confirm("Delete this banner?")) return;
+    await deleteDoc(doc(db, "banners", e.target.dataset.id));
+    location.reload();
+  };
+  </script>
 </body>
 </html>
