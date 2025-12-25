@@ -436,6 +436,23 @@ window.login = function () {
     }
   });
   </script>
+  <!-- Performance Boost -->
+<link rel="preconnect" href="https://www.gstatic.com">
+<link rel="preconnect" href="https://firebasestorage.googleapis.com">
+
+<script>
+  // Lazy-load all images automatically
+  document.querySelectorAll("img").forEach(img => {
+    img.loading = "lazy";
+  });
+
+  // Defer non-critical scripts
+  window.addEventListener("load", () => {
+    document.querySelectorAll("script").forEach(s => {
+      if (!s.type || s.type !== "module") s.defer = true;
+    });
+  });
+</script>
 </body>
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
