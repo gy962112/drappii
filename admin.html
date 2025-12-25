@@ -287,5 +287,46 @@
     location.reload();
   };
   </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getFirestore, addDoc, collection, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const box = document.createElement("div");
+  box.className = "box";
+  box.innerHTML = `
+    <h3>Send Notification</h3>
+    <input id="ntitle" placeholder="Title">
+    <input id="nmsg" placeholder="Message">
+    <button id="sendN">Send to All Users</button>
+  `;
+  document.body.appendChild(box);
+
+  sendN.onclick = async () => {
+    if (!ntitle.value || !nmsg.value) return alert("Fill all fields");
+    await addDoc(collection(db,"notifications"),{
+      uid:"all",
+      title:ntitle.value,
+      message:nmsg.value,
+      read:false,
+      createdAt:serverTimestamp()
+    });
+    alert("Notification sent");
+    ntitle.value="";
+    nmsg.value="";
+  };
+  </script>
 </body>
 </html>
