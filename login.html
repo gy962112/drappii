@@ -139,6 +139,12 @@
         });
     };
   </script>
+<script>
+  const isLoggedIn = localStorage.getItem("drappiiUser");
 
+  if (isLoggedIn) {
+    window.location.href = "home.html";
+  }
+</script>
 </body>
 </html>
