@@ -464,5 +464,22 @@ if (!window.__DRAPPII_PAY__) {
     });
   }, 1200);
   </script>
+  <!-- Performance Boost -->
+<link rel="preconnect" href="https://www.gstatic.com">
+<link rel="preconnect" href="https://firebasestorage.googleapis.com">
+
+<script>
+  // Lazy-load all images automatically
+  document.querySelectorAll("img").forEach(img => {
+    img.loading = "lazy";
+  });
+
+  // Defer non-critical scripts
+  window.addEventListener("load", () => {
+    document.querySelectorAll("script").forEach(s => {
+      if (!s.type || s.type !== "module") s.defer = true;
+    });
+  });
+</script>
 </body>
 </html>
