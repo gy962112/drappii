@@ -150,5 +150,69 @@
     }
   });
 </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, deleteDoc } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ⏳ Wait for product list to render
+  setTimeout(async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // 🔎 Fetch all products once
+    const snap = await getDocs(collection(db, "products"));
+
+    // 🔁 For each product shown on page, inject delete button
+    snap.forEach((d) => {
+      const id = d.id;
+
+      // Try to find product block by ID text
+      const el = Array.from(document.querySelectorAll(".item"))
+        .find(x => x.innerText.includes(id));
+
+      if (!el || el.querySelector(".del-btn")) return;
+
+      const btn = document.createElement("button");
+      btn.className = "del-btn";
+      btn.innerText = "🗑️ Delete";
+      btn.style.cssText = `
+        margin-top:6px;
+        background:#d32f2f;
+        color:#fff;
+        border:none;
+        padding:6px 10px;
+        border-radius:6px;
+        cursor:pointer;
+        font-size:13px;
+      `;
+
+      el.appendChild(btn);
+
+      btn.onclick = async () => {
+        if (!confirm("Delete this product permanently?")) return;
+
+        await deleteDoc(doc(db, "products", id));
+        alert("Product deleted");
+        location.reload();
+      };
+    });
+  }, 1200);
+    </script>
 </body>
 </html>
