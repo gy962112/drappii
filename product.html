@@ -434,5 +434,58 @@ if (!snap.exists()) {
     }
   });
 </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  const btn = document.getElementById("addToCartBtn");
+
+  btn.addEventListener("click", async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      alert("Please login first");
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const productId = params.get("id");
+
+    const name = document.getElementById("product-title").innerText;
+    const price = Number(
+      document.getElementById("product-price").innerText.replace("₹","")
+    );
+    const image = document.getElementById("product-image").src;
+
+    const itemRef = doc(db, "carts", user.uid, "items", productId);
+    const snap = await getDoc(itemRef);
+
+    if (snap.exists()) {
+      await setDoc(itemRef, {
+        qty: snap.data().qty + 1
+      }, { merge: true });
+    } else {
+      await setDoc(itemRef, {
+        name, price, image, qty: 1
+      });
+    }
+
+    alert("Added to cart");
+  });
+  </script>
 </body>
 </html>
