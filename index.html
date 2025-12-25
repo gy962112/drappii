@@ -278,6 +278,53 @@ window.login = function () {
     }
   });
   </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getFirestore, collection, getDocs } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Slider container
+  const slider = document.createElement("div");
+  slider.style.cssText = `
+    display:flex;
+    overflow-x:auto;
+    gap:10px;
+    padding:10px;
+    background:#fff;
+  `;
+  document.body.prepend(slider);
+
+  const snap = await getDocs(collection(db, "banners"));
+
+  snap.forEach(d => {
+    const b = d.data();
+    if (!b.active) return;
+
+    const img = document.createElement("img");
+    img.src = b.image;
+    img.style.cssText = `
+      min-width:90%;
+      border-radius:8px;
+      cursor:pointer;
+    `;
+    img.onclick = () => {
+      if (b.link) location.href = b.link;
+    };
+    slider.appendChild(img);
+  });
+  </script>
 </body>
   <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
