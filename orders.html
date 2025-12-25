@@ -363,5 +363,30 @@ if (!window.__DRAPPII_PAY__) {
     }
   });
 </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5",
+    measurementId: "G-NTRGF0TDVZ"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // 🔐 AUTH GUARD (Flipkart style)
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
+    }
+  });
+  </script>
 </body>
 </html>
