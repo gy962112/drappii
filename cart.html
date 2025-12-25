@@ -82,6 +82,68 @@
     totalDiv.innerText = "Total: ₹" + total;
   });
 </script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, doc, updateDoc } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
 
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ⏳ Wait till cart items are rendered
+  setTimeout(() => {
+    document.querySelectorAll(".item").forEach(item => {
+      if (item.querySelector(".auto-qty")) return;
+
+      const qtyText = item.innerText.match(/Qty:\s*(\d+)/);
+      if (!qtyText) return;
+
+      const qty = Number(qtyText[1]);
+      const docId = item.getAttribute("data-id");
+
+      if (!docId) return;
+
+      const qtyDiv = document.createElement("div");
+      qtyDiv.className = "auto-qty";
+      qtyDiv.style.marginTop = "6px";
+
+      qtyDiv.innerHTML = `
+        <button data-action="minus">−</button>
+        <span style="margin:0 10px">${qty}</span>
+        <button data-action="plus">+</button>
+      `;
+
+      item.appendChild(qtyDiv);
+
+      qtyDiv.addEventListener("click", async (e) => {
+        const action = e.target.getAttribute("data-action");
+        if (!action) return;
+
+        const user = auth.currentUser;
+        if (!user) return;
+
+        let newQty = qty;
+        if (action === "plus") newQty++;
+        if (action === "minus" && qty > 1) newQty--;
+
+        const ref = doc(db, "carts", user.uid, "items", docId);
+        await updateDoc(ref, { qty: newQty });
+
+        location.reload();
+      });
+    });
+  }, 1200);
+</script>
 </body>
 </html>
