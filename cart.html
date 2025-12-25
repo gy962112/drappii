@@ -348,5 +348,105 @@
     }
   });
   </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, collection, query, where, getDocs, updateDoc, doc } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // 🔔 Bell icon
+  const bell = document.createElement("div");
+  bell.style.cssText = `
+    position:fixed;
+    top:14px;
+    right:60px;
+    background:#fff;
+    border-radius:20px;
+    padding:6px 10px;
+    box-shadow:0 2px 6px rgba(0,0,0,.2);
+    cursor:pointer;
+    z-index:9999;
+    font-size:14px;
+  `;
+  bell.innerHTML = `🔔 <span id="nCount"
+    style="background:#ff3f6c;color:#fff;border-radius:50%;
+    padding:2px 6px;font-size:12px;display:none">0</span>`;
+  document.body.appendChild(bell);
+
+  // 🔔 Panel
+  const panel = document.createElement("div");
+  panel.style.cssText = `
+    position:fixed;
+    top:54px;
+    right:16px;
+    width:280px;
+    max-height:60vh;
+    overflow:auto;
+    background:#fff;
+    border-radius:8px;
+    box-shadow:0 4px 10px rgba(0,0,0,.3);
+    display:none;
+    z-index:9999;
+  `;
+  document.body.appendChild(panel);
+
+  bell.onclick = () => {
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
+  };
+
+  onAuthStateChanged(auth, async (user) => {
+    if (!user) return;
+
+    const q = query(
+      collection(db, "notifications"),
+      where("uid", "in", [user.uid, "all"])
+    );
+
+    const snap = await getDocs(q);
+    let unread = 0;
+    panel.innerHTML = "";
+
+    snap.forEach(d => {
+      const n = d.data();
+      if (!n.read) unread++;
+
+      const item = document.createElement("div");
+      item.style.cssText = `
+        padding:10px;
+        border-bottom:1px solid #eee;
+        font-size:13px;
+        ${n.read ? "" : "background:#f1f8ff"}
+      `;
+      item.innerHTML = `
+        <b>${n.title}</b><br>
+        <span>${n.message}</span>
+      `;
+      item.onclick = async () => {
+        await updateDoc(doc(db,"notifications",d.id),{read:true});
+        location.reload();
+      };
+      panel.appendChild(item);
+    });
+
+    const badge = document.getElementById("nCount");
+    if (unread > 0) {
+      badge.innerText = unread;
+      badge.style.display = "inline-block";
+    }
+  });
+    </script>
 </body>
 </html>
