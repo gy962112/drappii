@@ -215,5 +215,108 @@ snapshot.forEach(doc => {
     }
   });
   </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getFirestore, collection, getDocs, query, where, orderBy } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  /* ======================
+     UI BAR (AUTO ADD)
+     ====================== */
+  const bar = document.createElement("div");
+  bar.style.cssText = `
+    background:#fff;
+    padding:10px;
+    display:flex;
+    gap:6px;
+    position:sticky;
+    top:0;
+    z-index:999;
+    box-shadow:0 2px 4px rgba(0,0,0,.1);
+  `;
+  bar.innerHTML = `
+    <input id="searchBox" placeholder="Search products"
+      style="flex:2;padding:8px;border:1px solid #ccc;border-radius:6px">
+    <input id="minP" placeholder="Min ₹" type="number"
+      style="width:80px;padding:8px;border:1px solid #ccc;border-radius:6px">
+    <input id="maxP" placeholder="Max ₹" type="number"
+      style="width:80px;padding:8px;border:1px solid #ccc;border-radius:6px">
+    <select id="sort"
+      style="padding:8px;border:1px solid #ccc;border-radius:6px">
+      <option value="">Sort</option>
+      <option value="low">Price ↑</option>
+      <option value="high">Price ↓</option>
+    </select>
+    <button id="apply"
+      style="padding:8px 10px;background:#2874f0;color:#fff;border:none;border-radius:6px">
+      Apply
+    </button>
+  `;
+  document.body.prepend(bar);
+
+  /* ======================
+     FILTER LOGIC
+     ====================== */
+  const params = new URLSearchParams(location.search);
+  const category = params.get("cat");
+
+  const applyBtn = document.getElementById("apply");
+  applyBtn.onclick = async () => {
+    let q = collection(db, "products");
+
+    const filters = [];
+    if (category) filters.push(where("category", "==", category));
+
+    const min = Number(minP.value);
+    const max = Number(maxP.value);
+
+    if (min) filters.push(where("price", ">=", min));
+    if (max) filters.push(where("price", "<=", max));
+
+    let sortVal = sort.value;
+    let q2 = filters.length ? query(q, ...filters) : q;
+
+    if (sortVal === "low") q2 = query(q2, orderBy("price", "asc"));
+    if (sortVal === "high") q2 = query(q2, orderBy("price", "desc"));
+
+    const snap = await getDocs(q2);
+
+    // 🔄 Clear old products
+    document.querySelectorAll(".product").forEach(p => p.remove());
+
+    // 🔍 Search keyword
+    const key = searchBox.value.toLowerCase();
+
+    snap.forEach(d => {
+      const p = d.data();
+      if (key && !p.name.toLowerCase().includes(key)) return;
+
+      const card = document.createElement("div");
+      card.className = "product";
+      card.innerHTML = `
+        <img src="${p.image}" style="width:100%;height:150px;object-fit:contain">
+        <div>${p.name}</div>
+        <b>₹${p.price}</b>
+      `;
+      card.onclick = () => {
+        location.href = "product.html?id=" + d.id;
+      };
+
+      document.body.appendChild(card);
+    });
+  };
+  </script>
 </body>
 </html>
