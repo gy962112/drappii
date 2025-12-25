@@ -388,5 +388,70 @@ if (!window.__DRAPPII_PAY__) {
     }
   });
   </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, updateDoc } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ⏳ Wait for orders to render
+  setTimeout(async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const snap = await getDocs(collection(db, "orders"));
+
+    document.querySelectorAll(".order").forEach(async (orderEl) => {
+      if (orderEl.dataset.statusReady) return;
+      orderEl.dataset.statusReady = "yes";
+
+      const orderId = orderEl.getAttribute("data-id");
+      if (!orderId) return;
+
+      // 🔽 Status dropdown
+      const select = document.createElement("select");
+      select.style.cssText = `
+        margin-top:8px;
+        padding:6px;
+        border-radius:6px;
+      `;
+      select.innerHTML = `
+        <option value="Placed">Placed</option>
+        <option value="Shipped">Shipped</option>
+        <option value="Delivered">Delivered</option>
+      `;
+
+      orderEl.appendChild(select);
+
+      // 🔄 Load current status
+      snap.forEach(d => {
+        if (d.id === orderId) {
+          select.value = d.data().status || "Placed";
+        }
+      });
+
+      // 🔥 Update status in Firestore
+      select.onchange = async () => {
+        await updateDoc(doc(db, "orders", orderId), {
+          status: select.value
+        });
+        alert("Order status updated to " + select.value);
+      };
+    });
+  }, 1200);
+  </script>
 </body>
 </html>
