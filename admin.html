@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Panel – Drappii</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body{font-family:Arial;background:#f1f3f6;margin:0}
+    header{background:#2874f0;color:#fff;padding:14px;font-size:18px}
+    .box{background:#fff;margin:12px;padding:12px;border-radius:8px}
+    input,select,button{
+      width:100%;padding:10px;margin-top:8px;
+      border-radius:6px;border:1px solid #ccc;font-size:14px
+    }
+    button{background:#fb641b;color:#fff;border:none}
+    .item{border-bottom:1px solid #eee;padding:8px 0}
+    .small{font-size:12px;color:#666}
+  </style>
+</head>
+
+<body>
+
+<header>Admin Panel</header>
+
+<div class="box">
+  <h3>Add / Update Product</h3>
+  <input id="pid" placeholder="Product ID (leave blank to add new)">
+  <input id="name" placeholder="Product Name">
+  <input id="price" placeholder="Price (number)">
+  <input id="image" placeholder="Image URL">
+  <select id="category">
+    <option value="">Select Category</option>
+    <option value="mobiles">Mobiles</option>
+    <option value="fashion">Fashion</option>
+    <option value="electronics">Electronics</option>
+    <option value="grocery">Grocery</option>
+  </select>
+  <button id="saveBtn">Save Product</button>
+</div>
+
+<div class="box">
+  <h3>All Products</h3>
+  <div id="list"></div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from
+    "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import {
+    getFirestore, collection, addDoc, getDocs,
+    doc, updateDoc, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // 🔐 Admin guard (simple)
+  onAuthStateChanged(auth, user=>{
+    if(!user) location.href="login.html";
+  });
+
+  const pid = document.getElementById("pid");
+  const name = document.getElementById("name");
+  const price = document.getElementById("price");
+  const image = document.getElementById("image");
+  const category = document.getElementById("category");
+  const list = document.getElementById("list");
+
+  document.getElementById("saveBtn").onclick = async ()=>{
+    if(!name.value || !price.value || !image.value || !category.value){
+      alert("Fill all fields"); return;
+    }
+
+    if(pid.value){
+      await updateDoc(doc(db,"products",pid.value),{
+        name:name.value,
+        price:Number(price.value),
+        image:image.value,
+        category:category.value,
+        updatedAt:serverTimestamp()
+      });
+      alert("Product updated");
+    }else{
+      await addDoc(collection(db,"products"),{
+        name:name.value,
+        price:Number(price.value),
+        image:image.value,
+        category:category.value,
+        createdAt:serverTimestamp()
+      });
+      alert("Product added");
+    }
+    location.reload();
+  };
+
+  // 📦 Load products
+  const snap = await getDocs(collection(db,"products"));
+  snap.forEach(d=>{
+    const p=d.data();
+    list.innerHTML+=`
+      <div class="item">
+        <b>${p.name}</b> – ₹${p.price}
+        <div class="small">ID: ${d.id}</div>
+      </div>
+    `;
+  });
+</script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // 🔒 ADMIN EMAIL LIST
+  const ADMINS = ["admin@gmail.com"]; // <-- yaha apna admin email daalo
+
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      // login nahi hai
+      location.href = "login.html";
+      return;
+    }
+
+    if (!ADMINS.includes(user.email)) {
+      // admin nahi hai
+      alert("Access denied: Admins only");
+      location.href = "home.html";
+    }
+  });
+</script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, deleteDoc } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  // ⏳ Wait for product list to render
+  setTimeout(async () => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    // 🔎 Fetch all products once
+    const snap = await getDocs(collection(db, "products"));
+
+    // 🔁 For each product shown on page, inject delete button
+    snap.forEach((d) => {
+      const id = d.id;
+
+      // Try to find product block by ID text
+      const el = Array.from(document.querySelectorAll(".item"))
+        .find(x => x.innerText.includes(id));
+
+      if (!el || el.querySelector(".del-btn")) return;
+
+      const btn = document.createElement("button");
+      btn.className = "del-btn";
+      btn.innerText = "🗑️ Delete";
+      btn.style.cssText = `
+        margin-top:6px;
+        background:#d32f2f;
+        color:#fff;
+        border:none;
+        padding:6px 10px;
+        border-radius:6px;
+        cursor:pointer;
+        font-size:13px;
+      `;
+
+      el.appendChild(btn);
+
+      btn.onclick = async () => {
+        if (!confirm("Delete this product permanently?")) return;
+
+        await deleteDoc(doc(db, "products", id));
+        alert("Product deleted");
+        location.reload();
+      };
+    });
+  }, 1200);
+    </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // UI box
+  const box = document.createElement("div");
+  box.className = "box";
+  box.innerHTML = `
+    <h3>Home Banners</h3>
+    <input id="bannerImg" placeholder="Banner Image URL">
+    <input id="bannerLink" placeholder="Click Link (optional)">
+    <button id="addBanner">Add Banner</button>
+    <div id="bannerList"></div>
+  `;
+  document.body.appendChild(box);
+
+  // Add banner
+  document.getElementById("addBanner").onclick = async () => {
+    const image = bannerImg.value.trim();
+    if (!image) return alert("Image URL required");
+
+    await addDoc(collection(db, "banners"), {
+      image,
+      link: bannerLink.value || "",
+      active: true,
+      createdAt: serverTimestamp()
+    });
+
+    alert("Banner added");
+    location.reload();
+  };
+
+  // Load banners
+  const list = document.getElementById("bannerList");
+  const snap = await getDocs(collection(db, "banners"));
+
+  snap.forEach(d => {
+    list.innerHTML += `
+      <div style="margin-top:8px">
+        <img src="${d.data().image}" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px">
+        <button data-id="${d.id}" style="
+          margin-top:6px;
+          background:#d32f2f;
+          color:#fff;
+          border:none;
+          padding:6px 10px;
+          border-radius:6px;
+          cursor:pointer;
+        ">Delete</button>
+      </div>
+    `;
+  });
+
+  list.onclick = async (e) => {
+    if (!e.target.dataset.id) return;
+    if (!confirm("Delete this banner?")) return;
+    await deleteDoc(doc(db, "banners", e.target.dataset.id));
+    location.reload();
+  };
+  </script>
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  import { getFirestore, addDoc, collection, serverTimestamp } 
+    from "https://www.gstatic.com/firebasejs/12.7.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+    authDomain: "fashora-flipkart.firebaseapp.com",
+    projectId: "fashora-flipkart",
+    storageBucket: "fashora-flipkart.firebasestorage.app",
+    messagingSenderId: "383843603520",
+    appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const box = document.createElement("div");
+  box.className = "box";
+  box.innerHTML = `
+    <h3>Send Notification</h3>
+    <input id="ntitle" placeholder="Title">
+    <input id="nmsg" placeholder="Message">
+    <button id="sendN">Send to All Users</button>
+  `;
+  document.body.appendChild(box);
+
+  sendN.onclick = async () => {
+    if (!ntitle.value || !nmsg.value) return alert("Fill all fields");
+    await addDoc(collection(db,"notifications"),{
+      uid:"all",
+      title:ntitle.value,
+      message:nmsg.value,
+      read:false,
+      createdAt:serverTimestamp()
+    });
+    alert("Notification sent");
+    ntitle.value="";
+    nmsg.value="";
+  };
+  </script>
+</body>
+</html>
