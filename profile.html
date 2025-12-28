@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Account | Drapii</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --drapii-pink: #f43397;
+            --drapii-blue: #2455f4;
+            --text-main: #2d2d2d;
+            --text-sub: #65676b;
+            --bg-gray: #f0f2f5;
+            --border: #eeeeee;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-gray); font-family: -apple-system, sans-serif; color: var(--text-main); line-height: 1.4; padding-bottom: 80px; }
+
+        /* --- HEADER --- */
+        .profile-header { background-color: var(--white); padding: 24px 16px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--border); }
+        .avatar-container { position: relative; width: 64px; height: 64px; }
+        .avatar-circle { width: 64px; height: 64px; background-color: #fff1f8; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid #fce7f3; overflow: hidden; cursor: pointer; }
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-circle i { font-size: 28px; color: var(--drapii-pink); }
+        .camera-badge { position: absolute; bottom: 0; right: 0; background: var(--drapii-pink); color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; border: 2px solid white; }
+
+        .user-details h2 { font-size: 18px; font-weight: 800; color: #000; margin-bottom: 2px; }
+        .user-details p { font-size: 13px; color: var(--text-sub); font-weight: 500; }
+
+        /* --- QUICK ACTIONS --- */
+        .quick-actions { display: grid; grid-template-columns: repeat(3, 1fr); background-color: var(--white); margin-top: 8px; padding: 16px 0; border-bottom: 1px solid var(--border); }
+        .action-card { text-align: center; text-decoration: none; color: var(--text-main); border-right: 1px solid #f5f5f5; }
+        .action-card:last-child { border-right: none; }
+        .action-card i { font-size: 20px; color: var(--text-main); margin-bottom: 8px; display: block; }
+        .action-card span { font-size: 11px; font-weight: 700; color: var(--text-sub); }
+
+        /* --- SELLER BANNER --- */
+        #sellerBanner { display: none; margin: 12px 16px; padding: 16px; background: linear-gradient(135deg, var(--drapii-blue), #5b80f9); border-radius: 12px; color: var(--white); justify-content: space-between; align-items: center; text-decoration: none; box-shadow: 0 4px 12px rgba(36, 85, 244, 0.2); }
+        .banner-info h4 { font-size: 15px; font-weight: 800; }
+
+        /* --- MENU --- */
+        .menu-group { background-color: var(--white); margin-top: 8px; }
+        .menu-group-title { padding: 16px 16px 8px; font-size: 11px; font-weight: 700; color: var(--text-sub); text-transform: uppercase; }
+        .menu-item { display: flex; align-items: center; padding: 14px 16px; text-decoration: none; color: var(--text-main); border-bottom: 1px solid #f9f9f9; cursor: pointer; }
+        .menu-item i:first-child { width: 24px; font-size: 18px; color: var(--text-sub); margin-right: 12px; }
+        .menu-item span { flex: 1; font-size: 14px; font-weight: 600; }
+
+        /* --- MODAL --- */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 2000; padding: 20px; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; max-height: 80vh; overflow-y: auto; position: relative; max-width: 400px; margin: 50px auto; }
+        .close-modal { position: absolute; right: 15px; top: 15px; font-size: 20px; color: #666; cursor: pointer; }
+
+        .edit-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin: 10px 0 20px; outline: none; }
+        .save-btn { width: 100%; background: var(--drapii-pink); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+
+        /* --- LOGOUT --- */
+        .logout-section { padding: 24px 16px; }
+        .logout-btn { width: 100%; padding: 14px; background: var(--white); color: #d32f2f; border: 1px solid #ffcdd2; border-radius: 8px; font-weight: 700; cursor: pointer; display: flex; justify-content: center; gap: 8px; }
+
+        /* --- NAV --- */
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 60px; background: var(--white); border-top: 1px solid var(--border); display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-link { text-align: center; text-decoration: none; color: var(--text-sub); font-size: 10px; font-weight: 700; }
+        .nav-link.active { color: var(--drapii-pink); }
+        .nav-link i { font-size: 20px; display: block; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+    <header class="profile-header">
+        <div class="avatar-container" onclick="document.getElementById('imageInput').click()">
+            <div class="avatar-circle" id="profileImageDisplay">
+                <i class="fa-solid fa-user"></i>
+            </div>
+            <div class="camera-badge"><i class="fa-solid fa-camera"></i></div>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        
+        <div class="user-details">
+            <h2 id="userName">Loading...</h2>
+            <p id="userContact">Please wait</p>
+        </div>
+    </header>
+
+    <div class="quick-actions">
+        <a href="orders.html" class="action-card"><i class="fa-solid fa-box-archive"></i><span>My Orders</span></a>
+        <a href="#" class="action-card"><i class="fa-solid fa-location-dot"></i><span>Addresses</span></a>
+        <a href="#" class="action-card"><i class="fa-solid fa-heart"></i><span>Wishlist</span></a>
+    </div>
+
+    <a href="seller.html" id="sellerBanner">
+        <div class="banner-info"><h4>Seller Dashboard</h4><p>Manage inventory & orders</p></div>
+        <i class="fa-solid fa-chevron-right"></i>
+    </a>
+
+    <div class="menu-group">
+        <div class="menu-group-title">Account Settings</div>
+        <div class="menu-item" onclick="openEditProfile()"><i class="fa-solid fa-user-pen"></i><span>Edit Profile</span><i class="fa-solid fa-chevron-right"></i></div>
+        <a href="orders.html" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i><span>Order History</span><i class="fa-solid fa-chevron-right"></i></a>
+        <div class="menu-item" onclick="openPassModal()"><i class="fa-solid fa-lock"></i><span>Change Password</span><i class="fa-solid fa-chevron-right"></i></div>
+    </div>
+
+    <div class="menu-group">
+        <div class="menu-group-title">Support & Trust</div>
+        <a href="support.html" class="menu-item"><i class="fa-solid fa-circle-question"></i><span>Help Center</span><i class="fa-solid fa-chevron-right"></i></a>
+        <div class="menu-item" onclick="togglePrivacy()"><i class="fa-solid fa-shield-halved"></i><span>Privacy Policy</span><i class="fa-solid fa-chevron-right"></i></div>
+    </div>
+
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <i class="fa-solid fa-xmark close-modal" onclick="closeModal('editModal')"></i>
+            <h3>Edit Profile</h3>
+            <input type="text" id="newNameInput" class="edit-input">
+            <button class="save-btn" id="saveNameBtn">Save Changes</button>
+        </div>
+    </div>
+
+    <div class="modal" id="passModal">
+        <div class="modal-content">
+            <i class="fa-solid fa-xmark close-modal" onclick="closeModal('passModal')"></i>
+            <h3>Change Password</h3>
+            <p style="font-size: 13px; color: #666; margin: 10px 0;">We will send a password reset link to your registered email.</p>
+            <input type="email" id="resetEmail" class="edit-input" readonly>
+            <button class="save-btn" id="sendResetBtn">Send Reset Link</button>
+        </div>
+    </div>
+
+    <div class="modal" id="privacyModal">
+        <div class="modal-content">
+            <i class="fa-solid fa-xmark close-modal" onclick="closeModal('privacyModal')"></i>
+            <h3>Privacy Policy</h3>
+            <p style="font-size: 13px; color: #555;">Drapii ensures your data is safe and secure.</p>
+        </div>
+    </div>
+
+    <div class="logout-section">
+        <button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i>Logout</button>
+    </div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-link"><i class="fa-solid fa-house"></i>Home</a>
+        <a href="search.html" class="nav-link"><i class="fa-solid fa-list"></i>Categories</a>
+        <a href="orders.html" class="nav-link"><i class="fa-solid fa-bag-shopping"></i>Orders</a>
+        <a href="profile.html" class="nav-link active"><i class="fa-solid fa-user"></i>Account</a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, updateProfile, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q", 
+            authDomain: "fashora-flipkart.firebaseapp.com", 
+            projectId: "fashora-flipkart", 
+            storageBucket: "fashora-flipkart.firebasestorage.app", 
+            messagingSenderId: "383843603520", 
+            appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        // --- Window Functions ---
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+        window.togglePrivacy = () => document.getElementById('privacyModal').style.display = 'block';
+        window.openEditProfile = () => {
+            document.getElementById('editModal').style.display = 'block';
+            document.getElementById('newNameInput').value = document.getElementById('userName').innerText;
+        };
+        window.openPassModal = () => {
+            document.getElementById('passModal').style.display = 'block';
+            document.getElementById('resetEmail').value = auth.currentUser.email;
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('userName').innerText = user.displayName || "Drapii User";
+                document.getElementById('userContact').innerText = user.email;
+                if (user.photoURL) {
+                    document.getElementById('profileImageDisplay').innerHTML = `<img src="${user.photoURL}">`;
+                }
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    if (userData.role === "seller" || userData.role === "admin") {
+                        document.getElementById('sellerBanner').style.display = 'flex';
+                    }
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Password Reset Logic
+        document.getElementById('sendResetBtn').addEventListener('click', async () => {
+            const email = auth.currentUser.email;
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert("Password reset link sent to your email!");
+                closeModal('passModal');
+            } catch (e) {
+                alert("Error: " + e.message);
+            }
+        });
+
+        // Image Upload Logic
+        document.getElementById('imageInput').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            const user = auth.currentUser;
+            if (!file || !user) return;
+            const storageRef = ref(storage, 'profiles/' + user.uid);
+            try {
+                alert("Uploading...");
+                await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(storageRef);
+                await updateProfile(user, { photoURL: url });
+                await updateDoc(doc(db, "users", user.uid), { photo: url });
+                document.getElementById('profileImageDisplay').innerHTML = `<img src="${url}">`;
+                alert("Success!");
+            } catch (error) { alert(error.message); }
+        });
+
+        // Name Update Logic
+        document.getElementById('saveNameBtn').addEventListener('click', async () => {
+            const newName = document.getElementById('newNameInput').value;
+            if (newName && auth.currentUser) {
+                await updateProfile(auth.currentUser, { displayName: newName });
+                await updateDoc(doc(db, "users", auth.currentUser.uid), { name: newName });
+                document.getElementById('userName').innerText = newName;
+                closeModal('editModal');
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            if (confirm("Logout?")) signOut(auth).then(() => window.location.href = 'login.html');
+        });
+    </script>
+</body>
+</html>
