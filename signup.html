@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Drapii | Sign Up</title>
+    <style>
+        :root {
+            --meesho-pink: #f43397;
+            --meesho-pink-light: #fcdbe9;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --border: #dddddd;
+            --bg: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            padding: 24px;
+            max-width: 480px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-section {
+            text-align: center;
+            margin: 40px 0 32px;
+        }
+
+        .brand-name {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--meesho-pink);
+            letter-spacing: -1px;
+            margin: 0;
+        }
+
+        .brand-subtitle {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .view {
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        p.info {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 24px;
+        }
+
+        .label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-sub);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .phone-input-wrapper {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid var(--border);
+            padding: 8px 0;
+            transition: border-color 0.2s;
+        }
+
+        .phone-input-wrapper:focus-within {
+            border-color: var(--meesho-pink);
+        }
+
+        .country-code {
+            font-size: 18px;
+            font-weight: 600;
+            margin-right: 12px;
+            color: var(--text-main);
+        }
+
+        input[type="tel"], input[type="text"] {
+            border: none;
+            outline: none;
+            font-size: 18px;
+            width: 100%;
+            font-weight: 500;
+            background: transparent;
+        }
+
+        .otp-grid {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin: 20px 0;
+        }
+
+        .otp-box {
+            width: 45px;
+            height: 50px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .otp-box:focus {
+            border-color: var(--meesho-pink);
+            box-shadow: 0 0 0 1px var(--meesho-pink);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background-color: var(--meesho-pink);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-primary:disabled {
+            background-color: var(--meesho-pink-light);
+            cursor: not-allowed;
+        }
+
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast"></div>
+
+    <div class="container">
+        <div class="brand-section">
+            <h1 class="brand-name">Drapii</h1>
+            <div class="brand-subtitle">3-Hour Local Delivery</div>
+        </div>
+
+        <div class="auth-card">
+            <div id="phone-view" class="view active">
+                <h2>Sign Up</h2>
+                <p class="info">Enter your phone number to continue</p>
+                <div class="input-group">
+                    <span class="label">Phone Number</span>
+                    <div class="phone-input-wrapper">
+                        <span class="country-code">+91</span>
+                        <input type="tel" id="phone-input" placeholder="00000 00000" maxlength="10" inputmode="numeric">
+                    </div>
+                </div>
+                <div id="recaptcha-container"></div>
+                <button id="send-otp-btn" class="btn-primary" disabled>
+                    <span class="btn-text">Send OTP</span>
+                    <div class="loader"></div>
+                </button>
+                <p class="info" style="text-align: center; margin-top: 20px;">
+                    Already have an account? <a href="login.html" style="color: var(--meesho-pink); text-decoration: none; font-weight: bold;">Login</a>
+                </p>
+            </div>
+
+            <div id="otp-view" class="view">
+                <h2>Verify OTP</h2>
+                <p class="info">Sent to +91 <span id="display-number"></span></p>
+                <div class="otp-grid">
+                    <input type="tel" class="otp-box" maxlength="1" inputmode="numeric">
+                    <input type="tel" class="otp-box" maxlength="1" inputmode="numeric">
+                    <input type="tel" class="otp-box" maxlength="1" inputmode="numeric">
+                    <input type="tel" class="otp-box" maxlength="1" inputmode="numeric">
+                    <input type="tel" class="otp-box" maxlength="1" inputmode="numeric">
+                    <input type="tel" class="otp-box" maxlength="1" inputmode="numeric">
+                </div>
+                <button id="verify-otp-btn" class="btn-primary">
+                    <span class="btn-text">Verify OTP</span>
+                    <div class="loader"></div>
+                </button>
+            </div>
+
+            <div id="profile-view" class="view">
+                <h2>Complete Profile</h2>
+                <p class="info">Just a few more details to get started</p>
+                <div class="input-group">
+                    <span class="label">Full Name</span>
+                    <div class="phone-input-wrapper">
+                        <input type="text" id="name-input" placeholder="Enter your name">
+                    </div>
+                </div>
+                <button id="finish-btn" class="btn-primary">
+                    <span class="btn-text">Finish Sign Up</span>
+                    <div class="loader"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+            authDomain: "fashora-flipkart.firebaseapp.com",
+            projectId: "fashora-flipkart",
+            storageBucket: "fashora-flipkart.firebasestorage.app",
+            messagingSenderId: "383843603520",
+            appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let confirmationResult = null;
+
+        const phoneInput = document.getElementById('phone-input');
+        const sendOtpBtn = document.getElementById('send-otp-btn');
+        const otpBoxes = document.querySelectorAll('.otp-box');
+        const verifyOtpBtn = document.getElementById('verify-otp-btn');
+        const finishBtn = document.getElementById('finish-btn');
+        const toast = document.getElementById('toast');
+
+        function showToast(msg) {
+            toast.innerText = msg;
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        function toggleLoading(btn, isLoading) {
+            const text = btn.querySelector('.btn-text');
+            const loader = btn.querySelector('.loader');
+            btn.disabled = isLoading;
+            text.style.display = isLoading ? 'none' : 'block';
+            loader.style.display = isLoading ? 'block' : 'none';
+        }
+
+        // Auth Guard: Redirect if already logged in
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const checkUser = async () => {
+                    const snap = await getDoc(doc(db, "users", user.uid));
+                    if (snap.exists() && snap.data().name) {
+                        window.location.href = "index.html";
+                    }
+                };
+                checkUser();
+            }
+        });
+
+        phoneInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/\D/g, '');
+            sendOtpBtn.disabled = e.target.value.length !== 10;
+        });
+
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+
+        sendOtpBtn.addEventListener('click', async () => {
+            const phoneNumber = "+91" + phoneInput.value;
+            toggleLoading(sendOtpBtn, true);
+            try {
+                confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+                document.getElementById('display-number').innerText = phoneInput.value;
+                document.getElementById('phone-view').classList.remove('active');
+                document.getElementById('otp-view').classList.add('active');
+                otpBoxes[0].focus();
+            } catch (error) {
+                showToast("Error sending OTP. Try again.");
+                if (window.grecaptcha) window.grecaptcha.reset();
+            } finally {
+                toggleLoading(sendOtpBtn, false);
+            }
+        });
+
+        otpBoxes.forEach((box, index) => {
+            box.addEventListener('input', (e) => {
+                if (e.target.value && index < 5) otpBoxes[index + 1].focus();
+            });
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && index > 0) otpBoxes[index - 1].focus();
+            });
+        });
+
+        verifyOtpBtn.addEventListener('click', async () => {
+            const code = Array.from(otpBoxes).map(input => input.value).join('');
+            if (code.length !== 6) return showToast("Enter 6-digit OTP");
+            toggleLoading(verifyOtpBtn, true);
+            try {
+                const result = await confirmationResult.confirm(code);
+                const userSnap = await getDoc(doc(db, "users", result.user.uid));
+                if (userSnap.exists() && userSnap.data().name) {
+                    window.location.href = "index.html";
+                } else {
+                    document.getElementById('otp-view').classList.remove('active');
+                    document.getElementById('profile-view').classList.add('active');
+                }
+            } catch (error) {
+                showToast("Invalid OTP");
+            } finally {
+                toggleLoading(verifyOtpBtn, false);
+            }
+        });
+
+        finishBtn.addEventListener('click', async () => {
+            const name = document.getElementById('name-input').value.trim();
+            if (!name) return showToast("Please enter your name");
+            toggleLoading(finishBtn, true);
+            try {
+                const user = auth.currentUser;
+                await setDoc(doc(db, "users", user.uid), {
+                    name: name,
+                    phone: user.phoneNumber,
+                    role: "user",
+                    createdAt: serverTimestamp()
+                });
+                window.location.href = "index.html";
+            } catch (error) {
+                showToast("Error saving profile");
+            } finally {
+                toggleLoading(finishBtn, false);
+            }
+        });
+    </script>
+</body>
+</html>
