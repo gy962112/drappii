@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Drapii | Home</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --meesho-pink: #f43397;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --text-muted: #999999;
+            --bg-page: #f8f8f8;
+            --bg-card: #ffffff;
+            --success-green: #03a685;
+            --border-light: #f1f1f1;
+            --radius-main: 12px;
+            --shadow-premium: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: -apple-system, sans-serif; }
+        body { background-color: var(--bg-page); color: var(--text-main); padding-bottom: 80px; opacity: 0; transition: opacity 0.3s; }
+
+        header { background: #fff; position: sticky; top: 0; z-index: 1000; padding: 12px 16px; border-bottom: 1px solid var(--border-light); }
+        .header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+        .logo { font-size: 24px; font-weight: 900; color: var(--meesho-pink); text-decoration: none; letter-spacing: -1px; }
+
+        .search-container { position: relative; }
+        .search-bar { width: 100%; height: 44px; background: #f1f1f1; border: none; border-radius: 8px; padding: 0 44px; font-size: 14px; outline: none; }
+
+        .city-selector { display: flex; overflow-x: auto; background: #fff; padding: 10px 16px; gap: 10px; border-bottom: 1px solid var(--border-light); scrollbar-width: none; }
+        .city-selector::-webkit-scrollbar { display: none; }
+        .city-btn { padding: 6px 15px; border-radius: 20px; border: 1px solid #ddd; background: #fff; font-size: 12px; white-space: nowrap; font-weight: 600; color: #666; transition: 0.3s; }
+        .city-btn.active { background: var(--meesho-pink); color: #fff; border-color: var(--meesho-pink); }
+
+        /* Category Strip - Dynamic */
+        .category-strip { display: flex; overflow-x: auto; background: #fff; padding: 14px 12px; gap: 20px; scrollbar-width: none; min-height: 100px; }
+        .cat-item { min-width: 64px; text-align: center; text-decoration: none; }
+        .cat-img-wrapper { width: 56px; height: 56px; background: #fff1f8; border-radius: 50%; margin: 0 auto 6px; overflow: hidden; border: 1px solid #fce7f3; }
+        .cat-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .cat-item span { font-size: 11px; font-weight: 700; color: #444; }
+
+        .section-title { padding: 20px 16px 12px; font-size: 18px; font-weight: 800; }
+        .grid-container { padding: 0 12px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        
+        .product-card { background: var(--bg-card); border-radius: var(--radius-main); overflow: hidden; display: flex; flex-direction: column; box-shadow: var(--shadow-premium); position: relative; }
+        .p-image-box { width: 100%; aspect-ratio: 1 / 1.25; overflow: hidden; cursor: pointer; }
+        .p-image-box img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .p-details { padding: 10px; flex-grow: 1; cursor: pointer; }
+        .p-name { font-size: 13px; color: var(--text-sub); height: 38px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 5px; }
+        .p-price { font-size: 18px; font-weight: 800; }
+        .p-mrp { font-size: 12px; text-decoration: line-through; color: var(--text-muted); margin-left: 5px; }
+        .p-discount { font-size: 12px; color: var(--success-green); font-weight: 700; margin-left: 5px; }
+        
+        .p-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+        .badge { background: #f0f0f0; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #555; }
+        .badge-express { background: #e8f5e9; color: var(--success-green); }
+
+        .add-to-cart-btn {
+            width: calc(100% - 20px);
+            margin: 0 10px 10px;
+            background: #fff;
+            border: 1.5px solid var(--meesho-pink);
+            color: var(--meesho-pink);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .add-to-cart-btn:active { background: var(--meesho-pink); color: #fff; }
+
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; height: 64px; background: #fff; border-top: 1px solid #eee; display: flex; justify-content: space-around; align-items: center; z-index: 1000; }
+        .nav-item { text-align: center; text-decoration: none; color: #888; font-size: 10px; font-weight: 700; }
+        .nav-item.active { color: var(--meesho-pink); }
+        .nav-item i { font-size: 22px; display: block; margin-bottom: 4px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-top">
+            <a href="index.html" class="logo">Drapii</a>
+            <div style="display:flex; gap:18px; font-size:20px; color:#444;">
+                <i class="fa-regular fa-heart"></i>
+                <a href="cart.html" style="color:inherit;"><i class="fa-solid fa-cart-shopping"></i></a>
+            </div>
+        </div>
+        <div class="search-container" onclick="location.href='search.html'">
+            <i class="fa fa-search" style="position:absolute; left:16px; top:15px; color:#999;"></i>
+            <input type="text" class="search-bar" placeholder="Search for local products..." readonly>
+        </div>
+    </header>
+
+    <div class="city-selector" id="cityStrip">
+        <button class="city-btn active" onclick="filterByCity('All')">All India</button>
+        <button class="city-btn" onclick="filterByCity('Lucknow')">Lucknow</button>
+        <button class="city-btn" onclick="filterByCity('Delhi')">Delhi</button>
+        <button class="city-btn" onclick="filterByCity('Mumbai')">Mumbai</button>
+    </div>
+
+    <div class="category-strip" id="catStrip"></div>
+
+    <h2 class="section-title" id="gridTitle">Popular Near You</h2>
+    <div class="grid-container" id="productGrid"></div>
+
+    <nav class="bottom-nav">
+        <a href="index.html" class="nav-item active"><i class="fa-solid fa-house"></i>Home</a>
+        <a href="search.html" class="nav-item"><i class="fa-solid fa-layer-group"></i>Category</a>
+        <a href="orders.html" class="nav-item"><i class="fa-solid fa-bag-shopping"></i>Orders</a>
+        <a href="profile.html" class="nav-item"><i class="fa-regular fa-user"></i>Account</a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where, limit, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+            authDomain: "fashora-flipkart.firebaseapp.com",
+            projectId: "fashora-flipkart",
+            storageBucket: "fashora-flipkart.firebasestorage.app",
+            messagingSenderId: "383843603520",
+            appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentCity = 'All';
+
+        onAuthStateChanged(auth, (user) => {
+            document.body.style.opacity = "1";
+            loadCategories(); // dynamic load start
+            loadProducts();
+        });
+
+        // 1. DYNAMIC CATEGORY LOADER
+        async function loadCategories() {
+            const catStrip = document.getElementById('catStrip');
+            catStrip.innerHTML = ""; 
+
+            try {
+                // Fetching from "categories" collection
+                const catSnap = await getDocs(collection(db, "categories"));
+                
+                if (catSnap.empty) {
+                    catStrip.innerHTML = "<p style='font-size:10px; color:#999; padding:10px;'>Add categories in Admin</p>";
+                    return;
+                }
+
+                catSnap.forEach(doc => {
+                    const cat = doc.data();
+                    catStrip.innerHTML += `
+                        <a href="search.html?cat=${cat.name}" class="cat-item">
+                            <div class="cat-img-wrapper">
+                                <img src="${cat.image || 'https://via.placeholder.com/100'}" alt="${cat.name}">
+                            </div>
+                            <span>${cat.name}</span>
+                        </a>
+                    `;
+                });
+            } catch (err) { 
+                console.error("Category Load Error:", err); 
+            }
+        }
+
+        // 2. FAST ADD TO CART
+        window.fastAddToCart = async function(pid, name, price, img, event) {
+            event.stopPropagation();
+            const user = auth.currentUser;
+            if(!user) { alert("Please login first!"); window.location.href='login.html'; return; }
+
+            const btn = event.currentTarget;
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = "<i class='fa fa-spinner fa-spin'></i>";
+            
+            try {
+                await addDoc(collection(db, "carts"), {
+                    userId: user.uid,
+                    productId: pid,
+                    name: name,
+                    price: Number(price),
+                    image: img,
+                    quantity: 1,
+                    size: 'M',
+                    timestamp: new Date()
+                });
+                btn.innerHTML = "<i class='fa fa-check'></i> Added";
+                btn.style.borderColor = "#03a685";
+                btn.style.color = "#03a685";
+                setTimeout(() => {
+                    btn.innerHTML = originalContent;
+                    btn.style.borderColor = "#f43397";
+                    btn.style.color = "#f43397";
+                }, 2000);
+            } catch (e) { alert("Error adding to cart"); }
+        }
+
+        // 3. PRODUCT LOADER
+        async function loadProducts() {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = "<p style='grid-column: 1/3; text-align:center; padding:20px;'>Loading styles...</p>";
+            
+            try {
+                let q = currentCity === 'All' ? query(collection(db, "products"), limit(20)) : query(collection(db, "products"), where("city", "==", currentCity), limit(20));
+                const snap = await getDocs(q);
+                grid.innerHTML = "";
+                
+                snap.forEach(doc => {
+                    const p = doc.data();
+                    const price = p.price || 0;
+                    const mrp = Math.round(price * 1.35);
+
+                    grid.innerHTML += `
+                        <div class="product-card">
+                            <div class="p-image-box" onclick="location.href='product.html?id=${doc.id}'">
+                                <img src="${p.image}" loading="lazy" onerror="this.src='https://via.placeholder.com/200'">
+                            </div>
+                            <div class="p-details" onclick="location.href='product.html?id=${doc.id}'">
+                                <p class="p-name">${p.name}</p>
+                                <div>
+                                    <span class="p-price">₹${price}</span>
+                                    <span class="p-mrp">₹${mrp}</span>
+                                    <span class="p-discount">26% OFF</span>
+                                </div>
+                                <div class="p-tags">
+                                    <span class="badge badge-express">Express</span>
+                                    <span class="badge">Free Delivery</span>
+                                </div>
+                            </div>
+                            <button class="add-to-cart-btn" onclick="fastAddToCart('${doc.id}', '${p.name}', '${p.price}', '${p.image}', event)">
+                                <i class="fa-solid fa-cart-plus"></i> Add to Cart
+                            </button>
+                        </div>
+                    `;
+                });
+            } catch (err) { console.log(err); }
+        }
+
+        window.filterByCity = (city) => {
+            currentCity = city;
+            document.querySelectorAll('.city-btn').forEach(b => b.classList.toggle('active', b.innerText.includes(city)));
+            loadProducts();
+        };
+    </script>
+</body>
+</html>
