@@ -21,7 +21,6 @@
         * { margin:0; padding:0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text-main); padding-bottom: 120px; }
 
-        /* Luxe Header */
         .nav-header { 
             background: rgba(255,255,255,0.8); backdrop-filter: blur(15px);
             padding: 18px 20px; display: flex; align-items: center; 
@@ -33,7 +32,6 @@
 
         .container { max-width: 500px; margin: 0 auto; padding: 10px; }
 
-        /* Modern Section Cards */
         .section-card { 
             background: white; margin-bottom: 15px; padding: 25px; 
             border-radius: var(--card-radius); box-shadow: var(--luxe-shadow); 
@@ -53,7 +51,6 @@
         }
         .section-title i { color: var(--accent); font-size: 18px; }
 
-        /* Luxe Inputs */
         .input-box { 
             width: 100%; padding: 15px 18px; margin-bottom: 15px; 
             border: 1.5px solid #f0f0f0; border-radius: 16px; 
@@ -62,17 +59,13 @@
         }
         .input-box:focus { border-color: var(--accent); background: #fff; box-shadow: 0 5px 15px rgba(159, 32, 137, 0.05); }
 
-        /* Live Location Button */
         .btn-location { 
             background: var(--text-main); color: white; border: none; 
             width: 100%; padding: 15px; border-radius: 16px; 
             font-weight: 800; margin-bottom: 20px; cursor: pointer; 
             display: flex; align-items: center; justify-content: center; gap: 10px;
-            transition: 0.3s;
         }
-        .btn-location:active { transform: scale(0.97); }
 
-        /* Payment Options */
         .option { 
             display: flex; align-items: center; padding: 20px; 
             border: 2px solid #f5f6f8; border-radius: 20px; 
@@ -83,19 +76,13 @@
         .option b { display: block; font-size: 15px; margin-bottom: 2px; }
         .option span { font-size: 12px; color: var(--text-muted); font-weight: 500; }
 
-        /* QR Container */
         #drapii-qr-container { 
             display: none; text-align: center; padding: 20px; 
             background: #fafafa; border-radius: 24px; margin-top: 5px; 
             border: 1px dashed #ddd;
         }
-        .qr-wrapper img { 
-            width: 200px; height: 200px; margin: 10px 0; 
-            border: 8px solid white; border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        }
+        .qr-wrapper img { width: 200px; height: 200px; margin: 10px 0; border-radius: 20px; }
 
-        /* Loader Overlay */
         #loader-overlay { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);
@@ -105,11 +92,10 @@
         .spinner { 
             width: 50px; height: 50px; border: 4px solid #f3f3f3; 
             border-top: 4px solid var(--accent); border-radius: 50%; 
-            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite; 
+            animation: spin 1s infinite linear; 
         }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Floating Checkout Bar */
         .bottom-bar { 
             position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             width: 90%; max-width: 500px; background: var(--text-main); 
@@ -118,21 +104,20 @@
             border-radius: 24px; z-index: 1000;
         }
         .bottom-bar b { color: white; font-size: 22px; font-weight: 800; }
-        .bottom-bar span { color: #aaa; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .bottom-bar span { color: #aaa; font-size: 10px; text-transform: uppercase; }
 
         .btn-confirm { 
             background: white; color: black; border: none; 
             padding: 14px 28px; border-radius: 16px; 
-            font-weight: 800; cursor: pointer; transition: 0.3s;
+            font-weight: 800; cursor: pointer;
         }
-        .btn-confirm:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
 
     <div id="loader-overlay">
         <div class="spinner"></div>
-        <p style="margin-top: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px;">SECURELY PROCESSING...</p>
+        <p style="margin-top: 20px; font-weight: 800;">SECURELY PROCESSING...</p>
     </div>
 
     <div class="nav-header">
@@ -149,7 +134,7 @@
                 </div>
                 <div>
                     <b style="font-size: 16px; display: block;">Drapii Luxe Shipment</b>
-                    <p style="margin: 4px 0; font-size: 13px; color: var(--text-muted); font-weight: 500;">Express Delivery • COMPLIMENTARY</p>
+                    <p style="margin: 4px 0; font-size: 13px; color: var(--text-muted);">Express Delivery • COMPLIMENTARY</p>
                 </div>
             </div>
         </div>
@@ -160,44 +145,41 @@
                 <i class="fa-solid fa-location-arrow"></i> <span id="btn-text">Detect Live Location</span>
             </button>
             <input type="text" id="cust-name" class="input-box" placeholder="Recipient Full Name">
-            <input type="text" id="cust-address" class="input-box" placeholder="Complete Address (Flat, Street, Area)">
+            <input type="text" id="cust-address" class="input-box" placeholder="Complete Address">
             <div style="display: flex; gap: 12px;">
                 <input type="text" id="cust-city" class="input-box" placeholder="City">
                 <input type="tel" id="cust-pincode" class="input-box" placeholder="Pincode">
             </div>
-            <input type="tel" id="cust-phone" class="input-box" placeholder="10-Digit Secure Number">
+            <input type="tel" id="cust-phone" class="input-box" placeholder="10-Digit Phone Number">
         </div>
 
         <div class="section-card">
             <div class="section-title"><i class="fa-solid fa-credit-card"></i> Payment Method</div>
             <div class="option active" id="opt-cod" onclick="selectMethod('cod')">
                 <i class="fa-solid fa-truck-ramp-box main-icon"></i>
-                <div class="option-info"><b>Cash on Delivery</b><span>Pay on arrival • ₹999</span></div>
+                <div><b>Cash on Delivery</b><span>Pay on arrival • ₹999</span></div>
             </div>
             <div class="option" id="opt-qr" onclick="selectMethod('qr')">
                 <i class="fa-solid fa-qrcode main-icon"></i>
-                <div class="option-info"><b>Instant QR Checkout</b><span style="color:var(--accent); font-weight:700;">Exclusive ₹50 Discount</span></div>
+                <div><b>Instant QR Checkout</b><span style="color:var(--accent);">Exclusive ₹50 Discount</span></div>
             </div>
             
             <div id="drapii-qr-container">
-                <p style="font-size:12px; font-weight:700; color:var(--text-muted); margin-bottom:10px;">SCAN TO PAY SECURELY</p>
                 <div class="qr-wrapper"><img id="qr-img" src=""></div>
-                <input type="tel" id="txn-id" class="input-box" placeholder="Enter 12-digit UTR/TXN ID" style="background:#fff; border-style:dashed;">
+                <input type="tel" id="txn-id" class="input-box" placeholder="Enter 12-digit UTR/TXN ID">
             </div>
         </div>
     </div>
 
     <div class="bottom-bar">
-        <div>
-            <span>PAYABLE AMOUNT</span><br>
-            <b id="final-price">₹999</b>
-        </div>
+        <div><span>PAYABLE AMOUNT</span><br><b id="final-price">₹999</b></div>
         <button class="btn-confirm" id="confirm-btn">Confirm Order</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { 
             apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q", 
@@ -210,9 +192,16 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
+        let currentUID = null;
         let selectedMethod = 'cod';
-        const adminUpiID = "6387756278@ibl";
+
+        // Get User Login State
+        onAuthStateChanged(auth, user => {
+            if (user) { currentUID = user.uid; }
+            else { window.location.href = "login.html"; }
+        });
 
         window.selectMethod = (method) => {
             selectedMethod = method;
@@ -222,7 +211,7 @@
             const price = (method === 'qr') ? 949 : 999;
             document.getElementById('final-price').innerText = "₹" + price;
             if(method === 'qr') {
-                document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=${adminUpiID}&pn=Drapii_Admin&am=${price}&cu=INR`;
+                document.getElementById('qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=6387756278@ibl&am=${price}&cu=INR`;
             }
         };
 
@@ -236,35 +225,42 @@
                 document.getElementById('cust-pincode').value = data.address.postcode || "";
                 document.getElementById('cust-address').value = data.display_name;
                 btnText.innerText = "Location Synced!";
-            }, () => { alert("Please enable GPS for better accuracy."); btnText.innerText = "Detect Live Location"; });
+            }, () => { alert("Enable GPS"); btnText.innerText = "Detect Location"; });
         };
 
         document.getElementById('confirm-btn').onclick = async () => {
             const name = document.getElementById('cust-name').value;
             const phone = document.getElementById('cust-phone').value;
             const address = document.getElementById('cust-address').value;
-            const total = (selectedMethod === 'qr') ? 949 : 999;
+            const finalPrice = (selectedMethod === 'qr') ? 949 : 999;
 
-            if(!name || phone.length < 10 || !address) {
-                alert("Please complete the shipping information.");
+            if(!name || phone.length < 10 || !address || !currentUID) {
+                alert("Please fill all details and ensure you are logged in.");
                 return;
             }
 
             document.getElementById('loader-overlay').style.display = 'flex';
 
             try {
+                // IMPORTANT: Saving userId so orders.html can find it
                 await addDoc(collection(db, "orders"), {
+                    userId: currentUID,
                     customerName: name,
                     customerPhone: phone,
                     address: address,
-                    amount: total,
-                    method: selectedMethod,
+                    totalAmount: finalPrice,
+                    paymentMethod: selectedMethod,
                     status: "Pending",
-                    createdAt: new Date().toISOString()
+                    createdAt: new Date().toISOString(),
+                    items: [{
+                        name: "Luxe Collection Item",
+                        image: "https://img.freepik.com/free-photo/elegant-woman-wearing-saree_23-2149402434.jpg",
+                        price: finalPrice
+                    }]
                 });
                 window.location.href = "order-success.html";
             } catch (e) {
-                alert("Order failed: " + e.message);
+                alert("Error: " + e.message);
                 document.getElementById('loader-overlay').style.display = 'none';
             }
         };
