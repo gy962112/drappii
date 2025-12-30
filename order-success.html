@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Placed | Drapii Luxury</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #f8f9fb;
+            text-align: center;
+            padding: 20px;
+        }
+        .success-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 30px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            max-width: 400px;
+            width: 100%;
+            animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .icon-circle {
+            width: 80px;
+            height: 80px;
+            background: #00b894;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(0, 184, 148, 0.3);
+        }
+        h1 { color: #1a1a1a; font-size: 24px; margin-bottom: 10px; }
+        p { color: #666; line-height: 1.6; margin-bottom: 30px; }
+        
+        .order-id {
+            background: #f0f0f0;
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-weight: 700;
+            color: #333;
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .btn-home {
+            background: #f43397;
+            color: white;
+            text-decoration: none;
+            padding: 15px 40px;
+            border-radius: 15px;
+            font-weight: 700;
+            display: block;
+            box-shadow: 0 8px 15px rgba(244, 51, 151, 0.3);
+            transition: 0.3s;
+        }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="success-card">
+        <div class="icon-circle">
+            <i class="fa-solid fa-check"></i>
+        </div>
+        <h1>Order Placed!</h1>
+        <p>Hooray! Your luxury package from <b>Drapii</b> is being prepared for shipment.</p>
+        
+        <div class="order-id">
+            Order ID: #DRP-<span id="oid">77492</span>
+        </div>
+
+        <a href="index.html" class="btn-home">Continue Shopping</a>
+    </div>
+
+    <script>
+        // Automatic Confetti Celebration
+        var duration = 3 * 1000;
+        var end = Date.now() + duration;
+
+        (function frame() {
+            confetti({
+                particleCount: 3,
+                angle: 60,
+                spread: 55,
+                origin: { x: 0 },
+                colors: ['#f43397', '#00b894', '#ffce00']
+            });
+            confetti({
+                particleCount: 3,
+                angle: 120,
+                spread: 55,
+                origin: { x: 1 },
+                colors: ['#f43397', '#00b894', '#ffce00']
+            });
+
+            if (Date.now() < end) {
+                requestAnimationFrame(frame);
+            }
+        }());
+
+        // Generate random order ID
+        document.getElementById('oid').innerText = Math.floor(100000 + Math.random() * 900000);
+    </script>
+</body>
+</html>
