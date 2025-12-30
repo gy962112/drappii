@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Warehouse Panel | Drapii Luxe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        :root { --pink: #f43397; --bg: #f0f2f5; --dark: #1e293b; --success: #16a34a; --gray: #94a3b8; }
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body { background: var(--bg); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; }
+        
+        #authSection, .container { display: none; }
+        #authSection { width: 100%; max-width: 400px; background: #fff; padding: 25px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .auth-tabs { display: flex; background: #f1f5f9; padding: 5px; border-radius: 12px; margin-bottom: 20px; }
+        .auth-tab { flex:1; padding:10px; border:none; border-radius:8px; cursor:pointer; font-weight:700; color:#64748b; background:transparent; font-size: 12px; }
+        .auth-tab.active { background:#fff; color:var(--pink); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+        .container { width: 100%; max-width: 500px; padding-bottom: 40px; }
+        .wh-profile-card { background: #fff; border-radius: 16px; overflow: hidden; margin-bottom: 20px; border: 1px solid #eee; }
+        .wh-banner { width: 100%; height: 160px; object-fit: cover; background: #eee; border-bottom: 3px solid var(--pink); }
+        .wh-info { padding: 15px; }
+
+        label { display: block; font-size: 11px; font-weight: 800; margin-bottom: 5px; color: var(--dark); text-transform: uppercase; margin-top: 10px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1.5px solid #e2e8f0; border-radius: 12px; outline: none; font-size: 14px; margin-bottom: 10px; background: #fff; }
+        
+        .size-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 15px; }
+        .size-chip { padding: 8px 15px; border: 1.5px solid #e2e8f0; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; background: #fff; }
+        .size-chip.selected { background: var(--pink); color: #fff; border-color: var(--pink); }
+
+        .btn-main { width: 100%; padding: 15px; background: var(--pink); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+        .btn-main:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        .upload-area { border: 2px dashed #cbd5e1; padding: 15px; text-align: center; border-radius: 12px; background: #f8fafc; cursor: pointer; margin-bottom: 10px; }
+        .upload-area img { max-width: 100%; max-height: 150px; display: none; margin: 10px auto; border-radius: 8px; }
+        
+        .hidden { display: none; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-box { background: var(--dark); color: white; padding: 15px; border-radius: 15px; text-align: center; }
+        
+        .order-card { background:#fff; border-radius:12px; padding:15px; margin-bottom:15px; border:1px solid #eee; box-shadow:0 2px 5px rgba(0,0,0,0.02); }
+
+        #loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+        .spinner { width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--pink); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p style="margin-top:10px; font-weight:700; color:var(--dark)">Setting up Warehouse...</p>
+    </div>
+
+    <div id="authSection">
+        <div style="text-align: center; margin-bottom: 20px;">
+            <i class="fa-solid fa-warehouse" style="font-size: 40px; color: var(--pink);"></i>
+            <h2 style="margin-top:10px">Seller Hub</h2>
+        </div>
+        <div class="auth-tabs">
+            <button class="auth-tab active" id="loginTabBtn" onclick="toggleAuth('login')">Login</button>
+            <button class="auth-tab" id="signupTabBtn" onclick="toggleAuth('signup')">Register</button>
+        </div>
+        <div id="loginFields">
+            <input type="email" id="logEmail" placeholder="Email Address">
+            <input type="password" id="logPass" placeholder="Password">
+            <button class="btn-main" id="loginBtn" onclick="login()">Enter Warehouse</button>
+        </div>
+        <div id="signupFields" class="hidden">
+            <input type="text" id="regName" placeholder="Warehouse Name">
+            <textarea id="regAddr" placeholder="Full Address with Landmark"></textarea>
+            <label>Warehouse Image URL</label>
+            <input type="url" id="regWhUrl" placeholder="Paste image link here">
+            <input type="email" id="regEmail" placeholder="Email Address">
+            <input type="password" id="regPass" placeholder="Create Password">
+            <button class="btn-main" id="signupBtn" onclick="signup()">Create Warehouse Account</button>
+        </div>
+    </div>
+
+    <div class="container" id="dashboardSection">
+        <div class="header-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px">
+            <h2 id="welcomeName" style="font-weight:800">Warehouse</h2>
+            <button class="btn-main" onclick="logout()" style="width:auto; padding:8px 15px; background:#fee2e2; color:#ef4444"><i class="fa-solid fa-power-off"></i></button>
+        </div>
+
+        <div class="wh-profile-card">
+            <img id="displayWhImg" class="wh-banner" src="">
+            <div class="wh-info">
+                <p id="displayWhAddr" style="font-size: 13px; font-weight: 600; color:#555"></p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box"><h4>Orders</h4><p id="totalOrdersCount" style="font-size:22px; font-weight:800">0</p></div>
+            <div class="stat-box" style="background:var(--pink)"><h4>Payout</h4><p id="totalPayoutAmt" style="font-size:22px; font-weight:800">₹0</p></div>
+        </div>
+
+        <div class="auth-tabs" style="background:#fff; border:1px solid #eee">
+            <button class="auth-tab active" id="addTab" onclick="switchDash('add')">Add Product</button>
+            <button class="auth-tab" id="orderTab" onclick="switchDash('orders')">Live Orders</button>
+            <button class="auth-tab" id="payTab" onclick="switchDash('pay')">Payment QR</button>
+        </div>
+
+        <div id="addProductUI">
+            <label>Product Visuals</label>
+            <div class="upload-area" onclick="document.getElementById('pImg').click()">
+                <i class="fa-solid fa-image"></i> Click to Upload Photo
+                <img id="pImgPrev">
+            </div>
+            <input type="file" id="pImg" hidden onchange="previewImg(this, 'pImgPrev')">
+            <input type="url" id="pImgUrl" placeholder="OR Paste Image URL">
+
+            <label>Basic Details</label>
+            <input type="text" id="pName" placeholder="Product Title (e.g. Designer Silk Saree)">
+            <select id="pCategory">
+                <option value="">Select Category</option>
+                <option value="Saree">Saree</option>
+                <option value="Kurti">Kurti / Ethnic Wear</option>
+                <option value="Suits">Unstitched Suits</option>
+                <option value="Western">Western Wear</option>
+                <option value="Jewellery">Jewellery & Acc.</option>
+            </select>
+            
+            <textarea id="pDesc" placeholder="Description (Fabric, Work, Length etc)"></textarea>
+
+            <label>Available Sizes</label>
+            <div class="size-chips" id="sizeContainer">
+                <div class="size-chip" onclick="toggleSize(this)">S</div>
+                <div class="size-chip" onclick="toggleSize(this)">M</div>
+                <div class="size-chip" onclick="toggleSize(this)">L</div>
+                <div class="size-chip" onclick="toggleSize(this)">XL</div>
+                <div class="size-chip" onclick="toggleSize(this)">XXL</div>
+                <div class="size-chip" onclick="toggleSize(this)">Free Size</div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px">
+                <div>
+                    <label>Price (₹)</label>
+                    <input type="number" id="pPrice" placeholder="Selling Price">
+                </div>
+                <div>
+                    <label>In Stock (Qty)</label>
+                    <input type="number" id="pStock" placeholder="Total Stock">
+                </div>
+            </div>
+
+            <button class="btn-main" id="uploadBtn" onclick="uploadProduct()">Launch Product</button>
+        </div>
+
+        <div id="ordersUI" class="hidden">
+            <div id="ordersList"></div>
+        </div>
+
+        <div id="payUI" class="hidden">
+            <div class="upload-area" onclick="document.getElementById('qrImg').click()">
+                <i class="fa-solid fa-qrcode"></i> Upload Payment QR
+                <img id="qrImgPrev">
+            </div>
+            <input type="file" id="qrImg" hidden onchange="previewImg(this, 'qrImgPrev')">
+            <button class="btn-main" onclick="updateQR()">Save QR</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, getDocs, onSnapshot, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q", 
+            authDomain: "fashora-flipkart.firebaseapp.com", 
+            projectId: "fashora-flipkart", 
+            storageBucket: "fashora-flipkart.firebasestorage.app", 
+            messagingSenderId: "383843603520", 
+            appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        let sellerId = "";
+        let selectedSizes = [];
+
+        window.toggleAuth = (m) => {
+            document.getElementById('loginFields').classList.toggle('hidden', m==='signup');
+            document.getElementById('signupFields').classList.toggle('hidden', m==='login');
+            document.getElementById('loginTabBtn').classList.toggle('active', m==='login');
+            document.getElementById('signupTabBtn').classList.toggle('active', m==='signup');
+        };
+
+        window.toggleSize = (el) => {
+            el.classList.toggle('selected');
+            const size = el.innerText;
+            if(selectedSizes.includes(size)) {
+                selectedSizes = selectedSizes.filter(s => s !== size);
+            } else {
+                selectedSizes.push(size);
+            }
+        };
+
+        window.previewImg = (input, targetId) => {
+            const file = input.files[0];
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.getElementById(targetId);
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.switchDash = (tab) => {
+            document.getElementById('addProductUI').classList.toggle('hidden', tab !== 'add');
+            document.getElementById('ordersUI').classList.toggle('hidden', tab !== 'orders');
+            document.getElementById('payUI').classList.toggle('hidden', tab !== 'pay');
+            document.getElementById('addTab').classList.toggle('active', tab === 'add');
+            document.getElementById('orderTab').classList.toggle('active', tab === 'orders');
+            document.getElementById('payTab').classList.toggle('active', tab === 'pay');
+        };
+
+        onAuthStateChanged(auth, async (user) => {
+            const loader = document.getElementById('loader');
+            if (user) {
+                sellerId = user.uid;
+                const sDoc = await getDoc(doc(db, "sellers", sellerId));
+                if(sDoc.exists()){
+                    const d = sDoc.data();
+                    document.getElementById('welcomeName').innerText = d.warehouseName;
+                    document.getElementById('displayWhImg').src = d.warehouseImg;
+                    document.getElementById('displayWhAddr').innerText = d.address;
+                    document.getElementById('authSection').style.display = 'none';
+                    document.getElementById('dashboardSection').style.display = 'block';
+                    loadStats();
+                } else {
+                    document.getElementById('authSection').style.display = 'block';
+                    toggleAuth('signup');
+                }
+            } else {
+                document.getElementById('authSection').style.display = 'block';
+                document.getElementById('dashboardSection').style.display = 'none';
+            }
+            loader.style.display = 'none';
+        });
+
+        window.signup = async () => {
+            const email = document.getElementById('regEmail').value;
+            const pass = document.getElementById('regPass').value;
+            const url = document.getElementById('regWhUrl').value;
+            const name = document.getElementById('regName').value;
+            const addr = document.getElementById('regAddr').value;
+
+            if(!url || !name || !addr || !email || !pass) return alert("Fill all details!");
+            const btn = document.getElementById('signupBtn');
+            btn.disabled = true; btn.innerText = "Processing...";
+
+            try {
+                const res = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "sellers", res.user.uid), {
+                    warehouseName: name, address: addr, warehouseImg: url, email: email, sellerId: res.user.uid
+                });
+                location.reload();
+            } catch (e) { alert(e.message); btn.disabled = false; }
+        };
+
+        window.login = async () => {
+            try { await signInWithEmailAndPassword(auth, document.getElementById('logEmail').value, document.getElementById('logPass').value); }
+            catch (e) { alert("Login failed!"); }
+        };
+
+        window.uploadProduct = async () => {
+            const file = document.getElementById('pImg').files[0];
+            const urlInput = document.getElementById('pImgUrl').value;
+            const name = document.getElementById('pName').value;
+            const cat = document.getElementById('pCategory').value;
+            const price = document.getElementById('pPrice').value;
+            const stock = document.getElementById('pStock').value;
+            const desc = document.getElementById('pDesc').value;
+
+            if((!file && !urlInput) || !name || !cat || !price || !stock || selectedSizes.length === 0) {
+                return alert("Photo, Category, Price, Stock aur Size select karein!");
+            }
+
+            const btn = document.getElementById('uploadBtn');
+            btn.disabled = true; btn.innerText = "Launching...";
+
+            try {
+                let finalUrl = urlInput;
+                if(file) {
+                    const sRef = ref(storage, `products/${Date.now()}`);
+                    await uploadBytes(sRef, file);
+                    finalUrl = await getDownloadURL(sRef);
+                }
+
+                await addDoc(collection(db, "products"), {
+                    name, category: cat, description: desc, price: Number(price),
+                    stock: Number(stock), sizes: selectedSizes, image: finalUrl,
+                    sellerId: sellerId, timestamp: Date.now()
+                });
+
+                alert("Product Launched Successfully!");
+                location.reload();
+            } catch (e) { alert(e.message); btn.disabled = false; }
+        };
+
+        // --- Payout & Orders Logic ---
+        async function loadStats() {
+            const q = query(collection(db, "orders"), where("sellerId", "==", sellerId));
+            
+            onSnapshot(q, (snap) => {
+                document.getElementById('totalOrdersCount').innerText = snap.size;
+                
+                let totalEarnings = 0;
+                let ordersHTML = "";
+
+                if(snap.empty) {
+                    ordersHTML = `<p style="text-align:center; padding:20px; color:var(--gray)">No live orders yet.</p>`;
+                }
+
+                snap.forEach(docSnap => {
+                    const order = docSnap.data();
+                    const orderId = docSnap.id;
+                    
+                    // Logic: 20% commission cutting (Seller gets 80%)
+                    const sellerShare = (order.price || 0) * 0.8;
+                    totalEarnings += sellerShare;
+
+                    ordersHTML += `
+                        <div class="order-card">
+                            <div style="display:flex; gap:12px">
+                                <img src="${order.productImg || order.image}" style="width:65px; height:65px; border-radius:8px; object-fit:cover; border:1px solid #eee">
+                                <div style="flex:1">
+                                    <h4 style="font-size:14px; color:var(--dark)">${order.productName || 'Order Item'}</h4>
+                                    <p style="font-size:12px; color:var(--gray)">Size: <b>${order.size || 'N/A'}</b> | Qty: <b>${order.qty || 1}</b></p>
+                                    <p style="font-size:13px; color:var(--pink); font-weight:800; margin-top:4px">Your Share: ₹${sellerShare.toFixed(0)}</p>
+                                </div>
+                                <div style="text-align:right">
+                                    <span style="font-size:10px; padding:3px 8px; border-radius:10px; background:#fef3c7; color:#92400e; font-weight:700">${order.status || 'Pending'}</span>
+                                </div>
+                            </div>
+                            <hr style="margin:12px 0; border:0; border-top:1px solid #f1f5f9">
+                            <div style="font-size:11px; color:#64748b; line-height:1.5">
+                                <p><i class="fa-solid fa-user"></i> <b>${order.customerName || 'Customer'}</b></p>
+                                <p><i class="fa-solid fa-phone"></i> ${order.phone || 'N/A'}</p>
+                                <p><i class="fa-solid fa-location-dot"></i> ${order.address || 'Address not provided'}</p>
+                            </div>
+                            <div style="margin-top:12px; display:flex; gap:8px">
+                                <button onclick="updateStatus('${orderId}', 'Shipped')" style="flex:1; padding:8px; font-size:11px; border-radius:8px; border:none; background:#e0f2fe; color:#0369a1; font-weight:700">Mark Shipped</button>
+                                <button onclick="updateStatus('${orderId}', 'Delivered')" style="flex:1; padding:8px; font-size:11px; border-radius:8px; border:none; background:#dcfce7; color:#15803d; font-weight:700">Delivered</button>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('totalPayoutAmt').innerText = "₹" + totalEarnings.toFixed(0);
+                document.getElementById('ordersList').innerHTML = ordersHTML;
+            });
+        }
+
+        window.updateStatus = async (id, status) => {
+            try {
+                await updateDoc(doc(db, "orders", id), { status: status });
+                alert("Order status updated!");
+            } catch (e) { alert(e.message); }
+        };
+
+        window.updateQR = async () => {
+            const f = document.getElementById('qrImg').files[0];
+            if(!f) return alert("Select QR Photo");
+            try {
+                const sRef = ref(storage, `qrs/${sellerId}`);
+                await uploadBytes(sRef, f);
+                const url = await getDownloadURL(sRef);
+                await updateDoc(doc(db, "sellers", sellerId), { payoutQR: url });
+                alert("Payment QR Updated!");
+            } catch (e) { alert(e.message); }
+        };
+
+        window.logout = () => signOut(auth).then(() => location.reload());
+    </script>
+</body>
+</html>
