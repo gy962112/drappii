@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Drapii | Super Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --accent: #9f2089; --sidebar: #121212; --bg: #f8fafc; --text: #1e293b; --success: #10b981; --warning: #f59e0b; }
+        * { box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); display: flex; height: 100vh; width: 100vw; overflow: hidden; }
+
+        #login-overlay { position: fixed; inset: 0; background: var(--sidebar); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .login-box { background: white; padding: 35px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .login-input { width: 100%; padding: 15px; margin-bottom: 12px; border: 1.5px solid #eee; border-radius: 12px; outline: none; font-size: 16px; }
+
+        .sidebar { width: 280px; background: var(--sidebar); color: white; display: flex; flex-direction: column; padding: 20px; flex-shrink: 0; z-index: 1000; transition: 0.3s ease; }
+        .nav-link { padding: 14px 18px; border-radius: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; color: #94a3b8; font-size: 14px; font-weight: 600; }
+        .nav-link.active { background: var(--accent); color: white; box-shadow: 0 4px 15px rgba(159, 32, 137, 0.3); }
+
+        .main-content { flex: 1; height: 100vh; overflow-y: auto; padding: 25px; -webkit-overflow-scrolling: touch; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card { background: white; padding: 20px; border-radius: 20px; border: 1px solid #eee; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        
+        .tool-box { background: white; padding: 20px; border-radius: 20px; border: 1px solid #eee; margin-bottom: 20px; }
+        .tool-input { padding: 12px; border-radius: 10px; border: 1px solid #ddd; width: 100%; margin-bottom: 10px; font-size: 14px; }
+        .grid-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; margin-top: 15px; }
+        
+        .item-chip { position: relative; background: #fff; padding: 15px; border-radius: 18px; text-align: center; font-size: 13px; font-weight: 700; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
+        /* Multiple Slider Banner Style */
+        .banner-chip { position: relative; background: #fff; border-radius: 18px; overflow: hidden; border: 1px solid #eee; aspect-ratio: 16/7; margin-bottom: 10px; }
+        .banner-chip img { width: 100%; height: 100%; object-fit: cover; }
+        .banner-chip .info { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.6); color: white; padding: 5px; font-size: 10px; }
+
+        .cat-icon-preview { width: 60px; height: 60px; object-fit: contain; margin-bottom: 8px; border-radius: 12px; background: #f8fafc; padding: 5px; }
+        
+        .del-btn { position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border-radius: 50%; width: 24px; height: 24px; border: 2px solid white; cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center; transition: 0.2s; z-index: 10; }
+        .menu-toggle { display: none; background: white; padding: 15px 20px; align-items: center; justify-content: space-between; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 900; }
+        .table-wrap { background: white; border-radius: 20px; overflow-x: auto; border: 1px solid #eee; }
+        table { width: 100%; border-collapse: collapse; min-width: 650px; }
+        th { background: #f8fafc; padding: 15px; text-align: left; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; }
+        td { padding: 15px; border-bottom: 1px solid #f1f5f9; font-size: 13px; font-weight: 600; }
+
+        .btn-action { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .tab-pane { display: none; animation: fadeIn 0.3s ease; }
+        .tab-pane.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 768px) {
+            .sidebar { position: fixed; left: -280px; height: 100vh; }
+            .sidebar.open { left: 0; }
+            .menu-toggle { display: flex; }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 999; }
+            .sidebar-overlay.active { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-overlay">
+        <div class="login-box">
+            <h1 style="font-weight: 800; margin-bottom: 5px; color: #121212;">Drapii Luxe</h1>
+            <input type="text" id="admin-user" class="login-input" placeholder="Admin ID">
+            <input type="password" id="admin-pass" class="login-input" placeholder="Password">
+            <button onclick="loginAdmin()" style="width:100%; padding:16px; background:var(--accent); color:white; border:none; border-radius:12px; font-weight:800; cursor:pointer;">LOGIN</button>
+        </div>
+    </div>
+
+    <div class="sidebar-overlay" id="overlay" onclick="toggleMenu()"></div>
+
+    <div class="sidebar" id="sidebar">
+        <h2 style="font-weight: 800; margin-bottom: 30px; text-align: center;">DRAPII</h2>
+        <div class="nav-link active" data-tab="dashboard"><i class="fa-solid fa-gauge"></i> Dashboard</div>
+        <div class="nav-link" data-tab="storefront"><i class="fa-solid fa-wand-magic-sparkles"></i> Store Customizer</div>
+        <div class="nav-link" data-tab="orders"><i class="fa-solid fa-boxes-stacked"></i> Orders</div>
+        <div class="nav-link" style="margin-top:auto; color:#ef4444;" onclick="logout()"><i class="fa-solid fa-power-off"></i> Sign Out</div>
+    </div>
+
+    <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+        <div class="menu-toggle"><i class="fa-solid fa-bars-staggered" onclick="toggleMenu()"></i><b>ADMIN PANEL</b><div style="width: 20px;"></div></div>
+
+        <div class="main-content">
+            <div id="dashboard" class="tab-pane active">
+                <h2 style="font-weight: 800; margin-bottom: 20px;">System Health</h2>
+                <div class="stats-grid">
+                    <div class="card"><p>Total Sales</p><h3 id="stat-rev">₹0</h3></div>
+                    <div class="card"><p>Warehouses</p><h3 id="stat-sellers">0</h3></div>
+                </div>
+            </div>
+
+            <div id="storefront" class="tab-pane">
+                <h2 style="font-weight: 800; margin-bottom: 20px;">Store Customizer</h2>
+                
+                <div class="tool-box" style="border-left: 5px solid var(--accent);">
+                    <h3 style="font-size: 16px; margin-bottom: 15px;"><i class="fa-solid fa-images"></i> Manage Home Slider (Multiple Banners)</h3>
+                    <input type="text" id="slide-url" class="tool-input" placeholder="Paste ImgBB Code or Link here...">
+                    <input type="text" id="slide-title" class="tool-input" placeholder="Slide Title (Optional)">
+                    <button class="btn-action" onclick="addSliderBanner()">Add to Slider</button>
+                    
+                    <div style="margin-top: 15px;">
+                        <p style="font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase;">Current Slides:</p>
+                        <div id="slider-list" class="grid-list"></div>
+                    </div>
+                </div>
+
+                <div class="tool-box">
+                    <h3 style="font-size: 16px; margin-bottom: 15px;"><i class="fa-solid fa-image"></i> Update Main Static Banner</h3>
+                    <input type="text" id="banner-url" class="tool-input" placeholder="Paste ImgBB Code or Link here...">
+                    <input type="text" id="banner-title" class="tool-input" placeholder="Banner Title (Optional)">
+                    <input type="text" id="banner-sub" class="tool-input" placeholder="Banner Subtitle (Optional)">
+                    <button class="btn-action" onclick="updateBanner()">Update Static Banner</button>
+                    
+                    <div style="margin-top: 20px;">
+                        <p style="font-size: 12px; font-weight: 800; color: var(--accent);">CURRENT STATIC BANNER:</p>
+                        <div id="current-banner-preview" style="margin-top:10px; border-radius:15px; overflow:hidden; border:2px solid #eee;">
+                            <img id="live-banner-img" src="" style="width:100%; height:120px; object-fit:cover; display:none;">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tool-box">
+                    <h3 style="font-size: 16px; margin-bottom: 15px;"><i class="fa-solid fa-list"></i> Category Management</h3>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <input type="text" id="cat-name" class="tool-input" placeholder="Category Name">
+                        <input type="text" id="cat-img" class="tool-input" placeholder="Icon Image URL or Code">
+                    </div>
+                    <button class="btn-action" style="background: var(--sidebar);" onclick="addCategory()">Add Category</button>
+                    <div id="category-list" class="grid-list"></div>
+                </div>
+            </div>
+
+            <div id="orders" class="tab-pane">
+                <h2 style="font-weight:800; margin-bottom:15px;">Orders</h2>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>ID</th><th>Amount</th><th>Status</th><th>Action</th></tr></thead>
+                        <tbody id="order-list"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, addDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+            authDomain: "fashora-flipkart.firebaseapp.com",
+            projectId: "fashora-flipkart",
+            storageBucket: "fashora-flipkart.firebasestorage.app",
+            messagingSenderId: "383843603520",
+            appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function extractUrl(input) {
+            if(!input) return "";
+            const match = input.match(/src="([^"]+)"/);
+            if(match) return match[1];
+            if(input.includes("ibb.co/") && !input.includes("i.ibb.co/")) {
+                 return input.replace("ibb.co", "i.ibb.co") + ".jpg";
+            }
+            return input.trim();
+        }
+
+        window.loginAdmin = () => {
+            const user = document.getElementById('admin-user').value.trim().toLowerCase();
+            const pass = document.getElementById('admin-pass').value.trim();
+            if(user === "admin" && pass === "Arin") {
+                document.getElementById('login-overlay').style.display = 'none';
+                localStorage.setItem('drapii_admin_logged', 'true');
+                startSync();
+            } else { alert("Access Denied!"); }
+        }
+
+        if(localStorage.getItem('drapii_admin_logged') === 'true') {
+            document.getElementById('login-overlay').style.display = 'none';
+            startSync();
+        }
+
+        // --- NEW: SLIDER BANNER ADD LOGIC ---
+        window.addSliderBanner = async () => {
+            const rawUrl = document.getElementById('slide-url').value.trim();
+            const cleanUrl = extractUrl(rawUrl);
+            const title = document.getElementById('slide-title').value.trim();
+            
+            if(!cleanUrl) return alert("Please enter Image URL");
+            
+            try {
+                await addDoc(collection(db, "banners"), {
+                    image: cleanUrl,
+                    title: title || "Exclusive Offer",
+                    createdAt: Date.now()
+                });
+                alert("Slide Added to Slider!");
+                document.getElementById('slide-url').value = "";
+                document.getElementById('slide-title').value = "";
+            } catch(e) { alert("Error adding slider"); }
+        }
+
+        window.updateBanner = async () => {
+            const rawUrl = document.getElementById('banner-url').value.trim();
+            const cleanUrl = extractUrl(rawUrl);
+            const title = document.getElementById('banner-title').value.trim();
+            const sub = document.getElementById('banner-sub').value.trim();
+            
+            if(!cleanUrl) return alert("Please enter Image URL");
+            
+            try {
+                await setDoc(doc(db, "settings", "homeBanner"), {
+                    image: cleanUrl,
+                    title: title || "Elite Collection",
+                    subtitle: sub || "Luxury awaits you"
+                });
+                alert("Static Banner Updated!");
+                document.getElementById('banner-url').value = "";
+            } catch(e) { alert("Error updating banner"); }
+        }
+
+        window.addCategory = async () => {
+            const name = document.getElementById('cat-name').value.trim();
+            const rawImg = document.getElementById('cat-img').value.trim();
+            const cleanImg = extractUrl(rawImg);
+            if(!name || !cleanImg) return alert("Enter both name and icon URL");
+            await addDoc(collection(db, "categories"), { name: name, image: cleanImg });
+            document.getElementById('cat-name').value = '';
+            document.getElementById('cat-img').value = '';
+        }
+
+        window.deleteItem = async (col, id) => {
+            if(confirm("Delete this?")) await deleteDoc(doc(db, col, id));
+        }
+
+        function startSync() {
+            // Slider Banners Sync
+            const q = query(collection(db, "banners"), orderBy("createdAt", "desc"));
+            onSnapshot(q, snap => {
+                let h = "";
+                snap.forEach(d => {
+                    h += `<div class="banner-chip">
+                            <img src="${d.data().image}">
+                            <div class="info">${d.data().title}</div>
+                            <button class="del-btn" onclick="deleteItem('banners','${d.id}')">×</button>
+                          </div>`;
+                });
+                document.getElementById('slider-list').innerHTML = h;
+            });
+
+            // Static Banner Sync
+            onSnapshot(doc(db, "settings", "homeBanner"), d => {
+                if(d.exists()){
+                    const img = document.getElementById('live-banner-img');
+                    img.src = d.data().image;
+                    img.style.display = 'block';
+                }
+            });
+
+            // Categories Sync
+            onSnapshot(collection(db, "categories"), snap => {
+                let h = "";
+                snap.forEach(d => {
+                    h += `<div class="item-chip">
+                            <img src="${d.data().image}" class="cat-icon-preview">
+                            <div>${d.data().name}</div>
+                            <button class="del-btn" onclick="deleteItem('categories','${d.id}')">×</button>
+                          </div>`;
+                });
+                document.getElementById('category-list').innerHTML = h;
+            });
+
+            // Orders Sync
+            onSnapshot(collection(db, "orders"), (snap) => {
+                let total = 0; let h = "";
+                snap.forEach(d => {
+                    const o = d.data();
+                    total += parseFloat(o.amount || 0);
+                    h += `<tr><td>#${d.id.slice(-5)}</td><td>₹${o.amount}</td><td>${o.status}</td><td><button onclick="deleteItem('orders','${d.id}')">Cancel</button></td></tr>`;
+                });
+                document.getElementById('stat-rev').innerText = "₹" + total.toLocaleString();
+                document.getElementById('order-list').innerHTML = h;
+            });
+        }
+
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.onclick = () => {
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                link.classList.add('active');
+                document.getElementById(link.dataset.tab).classList.add('active');
+            }
+        });
+
+        window.logout = () => { localStorage.clear(); location.reload(); }
+        window.toggleMenu = () => {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('overlay').classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
