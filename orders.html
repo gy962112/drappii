@@ -20,7 +20,6 @@
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg-soft); color: var(--text-main); padding-bottom: 30px; }
 
-        /* Header */
         header { 
             padding: 25px 20px; background: #fff; position: sticky; top: 0; z-index: 100;
             display: flex; align-items: center; gap: 15px; box-shadow: 0 2px 15px rgba(0,0,0,0.04);
@@ -30,7 +29,6 @@
 
         .container { padding: 20px; max-width: 600px; margin: 0 auto; }
 
-        /* Order Card */
         .order-card {
             background: #fff; border-radius: 24px; padding: 20px; margin-bottom: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.03); border: 1px solid #eee;
@@ -39,42 +37,34 @@
         .order-card:active { transform: scale(0.98); }
 
         .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; }
-        .order-id { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+        .order-id { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
         .order-status { 
             font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 50px; 
             background: rgba(159, 32, 137, 0.1); color: var(--accent);
         }
 
         .product-brief { display: flex; gap: 15px; align-items: center; }
-        .product-brief img { width: 60px; height: 75px; object-fit: cover; border-radius: 12px; background: #f0f0f0; }
+        .product-brief img { width: 65px; height: 80px; object-fit: cover; border-radius: 12px; background: #f0f0f0; }
         .brief-info h3 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
         .brief-info p { font-size: 13px; color: var(--text-muted); font-weight: 600; }
 
-        /* Tracking Modal / Overlay */
         .tracking-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #fff; z-index: 1000; display: none; overflow-y: auto;
         }
-        .tracking-overlay.active { display: block; animation: slideIn 0.4s ease; }
+        .tracking-overlay.active { display: block; animation: slideIn 0.4s cubic-bezier(0, 1, 0.5, 1); }
         @keyframes slideIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
 
         .track-header { padding: 25px 20px; display: flex; align-items: center; gap: 15px; border-bottom: 1px solid #f0f0f0; }
 
-        /* Live Progress Bar */
         .track-status-box { padding: 30px 20px; }
         .stepper { position: relative; padding-left: 35px; }
         .step { position: relative; padding-bottom: 40px; }
-        .step::before { 
-            content: ''; position: absolute; left: -25px; top: 5px; 
-            width: 2px; height: 100%; background: #eee; 
-        }
+        .step::before { content: ''; position: absolute; left: -25px; top: 5px; width: 2px; height: 100%; background: #eee; }
         .step:last-child::before { display: none; }
         .step.completed::before { background: var(--success); }
         
-        .step-dot { 
-            position: absolute; left: -32px; top: 0; width: 16px; height: 16px; 
-            border-radius: 50%; background: #eee; border: 3px solid #fff; box-shadow: 0 0 0 2px #eee;
-        }
+        .step-dot { position: absolute; left: -32px; top: 0; width: 16px; height: 16px; border-radius: 50%; background: #eee; border: 3px solid #fff; box-shadow: 0 0 0 2px #eee; }
         .step.active .step-dot { background: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
         .step.completed .step-dot { background: var(--success); box-shadow: 0 0 0 2px var(--success); }
 
@@ -92,32 +82,29 @@
 <body>
 
 <header>
-    <i class="fa-solid fa-arrow-left" onclick="history.back()"></i>
+    <i class="fa-solid fa-arrow-left" onclick="window.location.href='index.html'"></i>
     <h1>My Orders</h1>
 </header>
 
-<div class="container" id="orders-list">
-    </div>
+<div class="container" id="orders-list"></div>
 
 <div id="empty-state">
     <i class="fa-solid fa-bag-shopping"></i>
-    <p style="font-weight: 700; color: #999;">No orders yet!</p>
+    <p style="font-weight: 700; color: #999;">No orders found!</p>
 </div>
 
 <div class="tracking-overlay" id="tracking-view">
     <div class="track-header">
         <i class="fa-solid fa-xmark" onclick="closeTracking()" style="font-size: 24px;"></i>
-        <h2 style="font-size: 18px; font-weight: 800;">Order Details</h2>
+        <h2 style="font-size: 18px; font-weight: 800;">Order Progress</h2>
     </div>
-
-    <div class="track-status-box" id="track-details">
-        </div>
+    <div class="track-status-box" id="track-details"></div>
 </div>
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
-    import { getFirestore, collection, query, where, getDocs, orderBy } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+    import { getFirestore, collection, query, where, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
 
     const firebaseConfig = { 
         apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q", 
@@ -133,76 +120,89 @@
     const db = getFirestore(app);
 
     onAuthStateChanged(auth, user => {
-        if (user) { loadOrders(user.uid); } 
-        else { window.location.href = "login.html"; }
+        if (user) { 
+            loadOrders(user.uid); 
+        } else { 
+            window.location.href = "signup.html"; 
+        }
     });
 
-    async function loadOrders(uid) {
+    function loadOrders(uid) {
         const listDiv = document.getElementById('orders-list');
         const emptyState = document.getElementById('empty-state');
         
-        try {
-            const q = query(collection(db, "orders"), where("userId", "==", uid), orderBy("createdAt", "desc"));
-            const snap = await getDocs(q);
-
+        // Real-time listener: Jab admin status badlega, page apne aap update hoga
+        const q = query(collection(db, "orders"), where("userId", "==", uid));
+        
+        onSnapshot(q, (snap) => {
             if (snap.empty) {
                 emptyState.style.display = "block";
+                listDiv.innerHTML = "";
                 return;
             }
 
+            emptyState.style.display = "none";
             listDiv.innerHTML = "";
-            snap.forEach(doc => {
-                const order = doc.data();
-                const card = `
-                    <div class="order-card" onclick='showTracking(${JSON.stringify(order)})'>
-                        <div class="order-header">
-                            <span class="order-id">ID: #${doc.id.slice(0,8)}</span>
-                            <span class="order-status">${order.status || 'Pending'}</span>
-                        </div>
-                        <div class="product-brief">
-                            <img src="${order.items[0].image}" alt="item">
-                            <div class="brief-info">
-                                <h3>${order.items[0].name}</h3>
-                                <p>${order.items.length > 1 ? '+ '+(order.items.length-1)+' more items' : 'Single Item'}</p>
-                                <p style="color: #000; margin-top:5px;">₹${order.totalAmount}</p>
-                            </div>
+            
+            snap.forEach(docSnap => {
+                const order = docSnap.data();
+                const orderId = docSnap.id;
+                
+                const card = document.createElement('div');
+                card.className = 'order-card';
+                card.innerHTML = `
+                    <div class="order-header">
+                        <span class="order-id">#${orderId.slice(-8)}</span>
+                        <span class="order-status">${order.status || 'Pending'}</span>
+                    </div>
+                    <div class="product-brief">
+                        <img src="${order.items[0].image}" alt="item">
+                        <div class="brief-info">
+                            <h3>${order.items[0].name}</h3>
+                            <p>${order.items.length > 1 ? '+ '+(order.items.length-1)+' more items' : 'Single Item'}</p>
+                            <p style="color: #000; margin-top:5px; font-weight:800;">₹${order.totalAmount}</p>
                         </div>
                     </div>
                 `;
-                listDiv.innerHTML += card;
+                // Direct Object pass karne se crash hota hai, isliye stringify kiya
+                card.onclick = () => showTracking(order, orderId);
+                listDiv.appendChild(card);
             });
-        } catch (e) { console.error(e); }
+        }, (error) => {
+            console.error("Error loading orders:", error);
+        });
     }
 
-    window.showTracking = (order) => {
+    window.showTracking = (order, id) => {
         const view = document.getElementById('tracking-view');
         const details = document.getElementById('track-details');
         
         const statusLevels = ["Pending", "Packed", "Shipped", "Delivered"];
-        const currentIdx = statusLevels.indexOf(order.status || "Pending");
+        const currentStatus = order.status || "Pending";
+        const currentIdx = statusLevels.indexOf(currentStatus);
 
         details.innerHTML = `
             <div style="background: #fdf0f9; padding: 20px; border-radius: 20px; margin-bottom: 25px;">
-                <p style="font-size: 13px; font-weight: 700; color: var(--accent);">Expected Delivery</p>
-                <h2 style="font-weight: 800;">Monday, 15 Oct</h2>
+                <p style="font-size: 12px; font-weight: 700; color: var(--accent);">Order ID: #${id}</p>
+                <h2 style="font-weight: 800; font-size: 18px; margin-top:5px;">${currentStatus}</h2>
             </div>
 
             <div class="stepper">
                 ${statusLevels.map((s, i) => `
-                    <div class="step ${i <= currentIdx ? 'completed' : ''} ${i === currentIdx ? 'active' : ''}">
+                    <div class="step ${i < currentIdx ? 'completed' : (i === currentIdx ? 'active' : '')}">
                         <div class="step-dot"></div>
                         <div class="step-txt">
                             <h4>${s}</h4>
-                            <p>${i <= currentIdx ? 'Completed' : 'Processing'}</p>
+                            <p>${i <= currentIdx ? 'Done' : 'Pending'}</p>
                         </div>
                     </div>
                 `).join('')}
             </div>
 
-            <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-                <div class="detail-row"><span>Total Amount</span><span>₹${order.totalAmount}</span></div>
-                <div class="detail-row"><span>Payment</span><span>${order.paymentMethod || 'COD'}</span></div>
-                <div class="detail-row"><span>Address</span><span style="font-size:12px; max-width:150px; text-align:right;">${order.address || 'Saved Address'}</span></div>
+            <div style="margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px;">
+                <div class="detail-row"><span>Items</span><span>${order.items.length} Units</span></div>
+                <div class="detail-row"><span>Total Paid</span><span>₹${order.totalAmount}</span></div>
+                <div class="detail-row"><span>Payment</span><span>${order.paymentMethod || 'Prepaid'}</span></div>
             </div>
         `;
         view.classList.add('active');
