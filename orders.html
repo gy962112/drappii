@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Orders | Drapii Luxe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --accent: #9f2089;
+            --accent-light: #fdf0f9;
+            --accent-gradient: linear-gradient(135deg, #9f2089 0%, #ff5e9e 100%);
+            --text-main: #2d0c28; 
+            --text-muted: #8e6d8a;
+            --bg-soft: #fcf8fc; 
+            --success: #00b894;
+            --danger: #ff3366;
+            --card-radius: 28px;
+            --card-glass: rgba(255, 255, 255, 0.9);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-soft); color: var(--text-main); padding-bottom: 30px; }
+
+        header { 
+            padding: 25px 20px; background: var(--card-glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            position: sticky; top: 0; z-index: 100; 
+            display: flex; align-items: center; gap: 15px; border-bottom: 1px solid rgba(159, 32, 137, 0.05);
+        }
+        header i { font-size: 20px; color: var(--accent); cursor: pointer; }
+        header h1 { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+
+        .container { padding: 20px; max-width: 600px; margin: 0 auto; }
+
+        .order-card {
+            background: #fff; border-radius: var(--card-radius); padding: 18px; margin-bottom: 20px;
+            box-shadow: 0 10px 25px rgba(159, 32, 137, 0.06); border: 1px solid rgba(159, 32, 137, 0.05);
+            transition: transform 0.2s; cursor: pointer;
+        }
+        .order-card:active { transform: scale(0.98); }
+
+        .order-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .order-id { font-size: 11px; font-weight: 800; color: var(--accent); background: var(--accent-light); padding: 5px 10px; border-radius: 10px; text-transform: uppercase; }
+        
+        .order-status { 
+            font-size: 11px; font-weight: 800; padding: 6px 14px; border-radius: 50px; 
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .status-pending { background: #fff4e6; color: #f76707; }
+        .status-confirmed { background: #ebfbee; color: #40c057; }
+        .status-packed { background: #e7f5ff; color: #228be6; }
+        .status-shipped { background: #f3f0ff; color: #7950f2; }
+        .status-delivered { background: #ebfbee; color: #40c057; }
+        .status-cancelled { background: #fee2e2; color: #ef4444; }
+
+        .product-brief { display: flex; gap: 18px; align-items: center; }
+        .img-container { 
+            width: 75px; height: 95px; border-radius: 18px; overflow: hidden; 
+            background: #fdf0f9; flex-shrink: 0; border: 1.5px solid #f8f1f8;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+        .img-container img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .brief-info h3 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
+        .price-tag { font-size: 18px; font-weight: 800; color: var(--accent); display: block; }
+
+        .stepper { margin: 30px 0; padding-left: 10px; }
+        .step { position: relative; padding-left: 40px; padding-bottom: 35px; border-left: 2.5px solid #f0e6ef; }
+        .step:last-child { border-left: 2.5px solid transparent; }
+        .step-dot {
+            position: absolute; left: -11px; top: 0; width: 20px; height: 20px; 
+            border-radius: 50%; background: #f0e6ef; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .step.active .step-dot { background: var(--accent); box-shadow: 0 0 0 4px var(--accent-light); }
+        .step.completed .step-dot { background: var(--success); box-shadow: 0 0 0 4px #ebfbee; }
+        .step.completed { border-left-color: var(--success); }
+        
+        .step h4 { font-size: 15px; font-weight: 700; color: #ccc; margin-bottom: 2px; }
+        .step.active h4 { color: var(--text-main); }
+        .step.completed h4 { color: var(--success); }
+
+        .tracking-overlay { 
+            position: fixed; inset: 0; background: #fff; z-index: 2000; 
+            display: none; flex-direction: column; 
+            animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        @keyframes slideIn { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        
+        .tracking-overlay.active { display: flex; }
+        .track-header { padding: 25px 20px; display: flex; align-items: center; gap: 20px; border-bottom: 1px solid #f8f1f8; }
+        .track-content { padding: 25px 20px; flex: 1; overflow-y: auto; background: var(--bg-soft); }
+
+        .btn-cancel {
+            width: 100%; padding: 18px; background: #fff; color: var(--danger);
+            border: 2px solid #fee2e9; border-radius: 22px; font-weight: 800;
+            margin-top: 25px; cursor: pointer; transition: 0.3s;
+        }
+        .btn-cancel:active { background: #fff1f5; transform: scale(0.96); }
+
+        #empty-state { text-align: center; margin-top: 150px; display: none; padding: 20px; }
+        #empty-state i { background: var(--accent-light); color: var(--accent); width: 100px; height: 100px; line-height: 100px; border-radius: 40px; font-size: 40px; margin-bottom: 20px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+<header>
+    <i class="fa-solid fa-arrow-left" onclick="window.history.back()"></i>
+    <h1>Order History</h1>
+</header>
+
+<div class="container" id="orders-list"></div>
+
+<div id="empty-state">
+    <i class="fa-solid fa-bag-shopping"></i>
+    <p style="font-weight: 800; font-size: 18px; color: var(--text-main);">No Orders Yet</p>
+    <p style="color: var(--text-muted); font-size: 14px; margin-top: 5px;">Your luxury closet is waiting to be filled.</p>
+</div>
+
+<div class="tracking-overlay" id="tracking-view">
+    <div class="track-header">
+        <i class="fa-solid fa-xmark" onclick="closeTracking()" style="font-size: 22px; color: var(--text-main);"></i>
+        <h2 style="font-size: 20px; font-weight: 800; color: var(--text-main);">Live Tracking</h2>
+    </div>
+    <div class="track-content" id="track-details"></div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q", 
+        authDomain: "fashora-flipkart.firebaseapp.com", 
+        projectId: "fashora-flipkart", 
+        storageBucket: "fashora-flipkart.firebasestorage.app", 
+        messagingSenderId: "383843603520", 
+        appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5" 
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    function getValidImage(data) {
+        let imgUrl = data.productImg || data.productImage || data.image || data.img || "";
+        if (!imgUrl && data.items && data.items.length > 0) {
+            imgUrl = data.items[0].productImg || data.items[0].image || data.items[0].img || "";
+        }
+        return (imgUrl && typeof imgUrl === 'string') ? imgUrl : "https://via.placeholder.com/300x400?text=Luxe+Item";
+    }
+
+    onAuthStateChanged(auth, user => {
+        if (user) { loadOrders(user.uid); } 
+        else { window.location.href = "login.html"; }
+    });
+
+    function loadOrders(uid) {
+        const listDiv = document.getElementById('orders-list');
+        const emptyState = document.getElementById('empty-state');
+        
+        // FIX: Removed orderBy from query to avoid Indexing error (Blank screen)
+        const q = query(collection(db, "orders"), where("userId", "==", uid));
+        
+        onSnapshot(q, (snap) => {
+            if (snap.empty) { emptyState.style.display = "block"; listDiv.innerHTML = ""; return; }
+            emptyState.style.display = "none";
+            
+            // Manual Sorting by timestamp (latest first)
+            const sortedDocs = snap.docs.sort((a, b) => (b.data().timestamp || 0) - (a.data().timestamp || 0));
+            
+            listDiv.innerHTML = "";
+            sortedDocs.forEach(d => {
+                const order = d.data();
+                const orderDocId = d.id;
+                const price = order.totalPrice || order.price || 0;
+                const status = order.status || 'Pending';
+                
+                const card = document.createElement('div');
+                card.className = 'order-card';
+                card.innerHTML = `
+                    <div class="order-header">
+                        <span class="order-id">#${orderDocId.slice(-6).toUpperCase()}</span>
+                        <span class="order-status status-${status.toLowerCase()}">${status}</span>
+                    </div>
+                    <div class="product-brief">
+                        <div class="img-container">
+                            <img src="${getValidImage(order)}" onerror="this.src='https://via.placeholder.com/300x400?text=Luxe'">
+                        </div>
+                        <div class="brief-info">
+                            <h3>${order.productName || "Luxury Item"}</h3>
+                            <span class="price-tag">₹${price.toLocaleString('en-IN')}</span>
+                        </div>
+                    </div>
+                `;
+                card.onclick = () => showTracking(order, orderDocId);
+                listDiv.appendChild(card);
+            });
+        }, (err) => {
+            console.error("Snapshot error:", err);
+            listDiv.innerHTML = `<p style='text-align:center; padding:20px; color:red;'>Error loading orders. Please refresh.</p>`;
+        });
+    }
+
+    window.showTracking = (order, docId) => {
+        const view = document.getElementById('tracking-view');
+        const details = document.getElementById('track-details');
+        
+        const statuses = ["Pending", "Confirmed", "Packed", "Shipped", "Delivered"];
+        const currentStatus = order.status || "Pending";
+        const currentIndex = statuses.indexOf(currentStatus);
+
+        let stepperHtml = '<div class="stepper">';
+        if(currentStatus === "Cancelled") {
+            stepperHtml = '<div style="background:#fff; border: 2px solid #fee2e2; color:#ef4444; padding:20px; border-radius:24px; font-weight:800; text-align:center;"><i class="fa-solid fa-circle-xmark" style="font-size:30px; margin-bottom:10px; display:block;"></i> ORDER CANCELLED</div>';
+        } else {
+            statuses.forEach((s, i) => {
+                let stateClass = i < currentIndex ? "completed" : (i === currentIndex ? "active" : "");
+                stepperHtml += `
+                    <div class="step ${stateClass}">
+                        <div class="step-dot"></div>
+                        <h4>${s}</h4>
+                        <p style="font-size:11px; color:var(--text-muted);">${i <= currentIndex ? 'Status Updated' : 'Upcoming'}</p>
+                    </div>`;
+            });
+            stepperHtml += '</div>';
+        }
+
+        details.innerHTML = `
+            <div style="background:#fff; padding: 25px; border-radius: 30px; margin-bottom: 20px; text-align: center; border: 1px solid #f8f1f8;">
+                <h2 style="color:var(--accent); font-size: 26px; font-weight:800; margin-bottom:5px;">${currentStatus}</h2>
+                <p style="color:var(--text-muted); font-size:13px; font-weight:600;">ID: #${docId.slice(-8).toUpperCase()}</p>
+            </div>
+            ${stepperHtml}
+            <div style="background:#fff; padding:20px; border-radius:28px; font-size:14px; line-height:1.6; border: 1px solid #f8f1f8;">
+                <p style="margin-bottom:10px;"><strong style="color:var(--text-muted);">Delivery to:</strong><br>${order.address || 'Registered Address'}</p>
+                <div style="margin-top:15px; padding-top:15px; border-top: 1px dashed #eee; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700;">Total Amount:</span>
+                    <span style="color:var(--accent); font-weight:800; font-size:20px;">₹${(order.totalPrice || order.price || 0).toLocaleString('en-IN')}</span>
+                </div>
+            </div>
+            ${(currentStatus === 'Pending' || currentStatus === 'Confirmed') ? `<button class="btn-cancel" onclick="cancelOrder('${docId}')">Cancel Order</button>` : ''}
+        `;
+        view.classList.add('active');
+    };
+
+    window.cancelOrder = async (docId) => {
+        if (confirm("Are you sure you want to cancel this order?")) {
+            try {
+                const orderRef = doc(db, "orders", docId);
+                await updateDoc(orderRef, { status: 'Cancelled' });
+                alert("Order Cancelled successfully.");
+                closeTracking();
+            } catch(e) {
+                console.error("Cancel Error: ", e);
+                alert("Cancellation failed. Please try again.");
+            }
+        }
+    };
+
+    window.closeTracking = () => document.getElementById('tracking-view').classList.remove('active');
+</script>
+</body>
+</html>
