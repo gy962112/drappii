@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Cart | Drapii Luxe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root { 
+            --accent: #9f2089; 
+            --accent-light: #fdf0f9;
+            --accent-gradient: linear-gradient(135deg, #9f2089 0%, #ff5e9e 100%);
+            --bg: #fcf8fc; /* Soft Luxe Background */
+            --text-main: #2d0c28; /* Dark Begni Black */
+            --text-muted: #8e6d8a;
+            --card-radius: 28px;
+            --card-glass: rgba(255, 255, 255, 0.9);
+        }
+
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); padding-bottom: 140px; color: var(--text-main); }
+        
+        .cart-header { 
+            background: var(--card-glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            padding: 25px 20px; font-weight: 800; font-size: 20px;
+            border-bottom: 1px solid rgba(159, 32, 137, 0.05); display: flex; gap: 20px; 
+            align-items: center; position: sticky; top: 0; z-index: 100;
+        }
+        .cart-header i { color: var(--accent); font-size: 20px; }
+
+        #loader { text-align: center; padding: 100px 20px; display: block; }
+        .spinner { 
+            width: 40px; height: 40px; border: 4px solid #f0e6ef; 
+            border-top: 4px solid var(--accent); border-radius: 50%; 
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite; margin: 0 auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .cart-item { 
+            background: #fff; padding: 18px; display: flex; gap: 20px; 
+            margin: 15px; border-radius: var(--card-radius);
+            position: relative; box-shadow: 0 10px 25px rgba(159, 32, 137, 0.06);
+            border: 1px solid rgba(159, 32, 137, 0.05); animation: slideIn 0.5s ease-out;
+        }
+        @keyframes slideIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+        .item-img { 
+            width: 95px; height: 125px; object-fit: cover; border-radius: 20px; 
+            background: #fdf0f9; box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+        .item-details { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .item-name { font-size: 16px; color: var(--text-main); font-weight: 700; line-height: 1.3; }
+        .item-price { font-weight: 800; font-size: 18px; color: var(--accent); margin-top: 5px; }
+        
+        .qty-control { 
+            display: flex; align-items: center; gap: 15px; margin-top: 12px; 
+            background: var(--accent-light); width: fit-content; border-radius: 14px; 
+            padding: 6px 14px; border: 1px solid rgba(159, 32, 137, 0.1);
+        }
+        .qty-btn { cursor: pointer; color: var(--accent); font-weight: 800; font-size: 18px; }
+        .qty-num { font-size: 14px; font-weight: 800; min-width: 20px; text-align: center; color: var(--text-main); }
+
+        .trash-btn { 
+            position: absolute; top: 18px; right: 18px; color: #ff4d6d; 
+            font-size: 16px; background: #fff1f3; width: 38px; height: 38px; 
+            display: flex; align-items: center; justify-content: center; 
+            border-radius: 14px; cursor: pointer; transition: 0.2s;
+        }
+        .trash-btn:active { transform: scale(0.9); background: #ffe2e6; }
+
+        .price-summary { 
+            background: #fff; padding: 25px; margin: 25px 15px; 
+            border-radius: var(--card-radius); box-shadow: 0 10px 25px rgba(159, 32, 137, 0.06);
+            border: 1px solid rgba(159, 32, 137, 0.05);
+        }
+        .sum-row { display: flex; justify-content: space-between; margin-bottom: 15px; color: var(--text-muted); font-size: 14px; font-weight: 600; }
+        .sum-total { 
+            font-weight: 800; font-size: 20px; color: var(--text-main); 
+            border-top: 1.5px dashed #f0e6ef; padding-top: 18px; margin-top: 5px; 
+        }
+
+        .cart-footer { 
+            position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+            width: 92%; max-width: 500px; background: var(--text-main); 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 18px 25px; border-radius: 26px; z-index: 1000;
+            box-shadow: 0 15px 35px rgba(45, 12, 40, 0.3);
+        }
+        .footer-info p { color: #fff; font-weight: 800; font-size: 20px; }
+        .footer-info span { color: rgba(255,255,255,0.5); font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700; }
+
+        .btn-checkout { 
+            background: #fff; color: var(--text-main); padding: 12px 22px; 
+            border-radius: 18px; border: none; font-weight: 800; font-size: 15px; 
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
+            transition: 0.2s;
+        }
+        .btn-checkout:active { transform: scale(0.95); }
+        
+        .empty-cart { text-align: center; padding: 120px 40px; }
+        .empty-cart i { 
+            font-size: 60px; color: var(--accent); background: var(--accent-light);
+            width: 110px; height: 110px; line-height: 110px; border-radius: 40px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="cart-header">
+        <i class="fa-solid fa-chevron-left" onclick="location.href='index.html'"></i> 
+        <span>My Shopping Bag</span>
+    </div>
+
+    <div id="loader">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="cartItemsContainer"></div>
+
+    <div id="summarySection" style="display: none;">
+        <div class="price-summary">
+            <p style="font-weight:800; margin-bottom:20px; font-size:17px; letter-spacing: -0.3px;">Price Details</p>
+            <div class="sum-row"><span>Bag Value</span><span id="orderTotal">₹0</span></div>
+            <div class="sum-row"><span>Luxe Delivery</span><span style="color:#00b894; font-weight:800;">FREE</span></div>
+            <div class="sum-row sum-total"><span>Total Payable</span><span id="finalPrice" style="color:var(--accent);">₹0</span></div>
+        </div>
+    </div>
+
+    <div class="cart-footer" id="cartFooter" style="display: none;">
+        <div class="footer-info">
+            <span id="itemCountDisplay">0 ITEMS</span>
+            <p id="footerPrice">₹0</p>
+        </div>
+        <button class="btn-checkout" onclick="location.href='checkout.html'">Checkout <i class="fa-solid fa-arrow-right-long"></i></button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, query, where, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+            authDomain: "fashora-flipkart.firebaseapp.com",
+            projectId: "fashora-flipkart",
+            storageBucket: "fashora-flipkart.firebasestorage.app",
+            messagingSenderId: "383843603520",
+            appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        onAuthStateChanged(auth, user => {
+            if(!user) { window.location.href = 'login.html'; return; }
+            loadCartItems(user.uid);
+        });
+
+        async function loadCartItems(uid) {
+            const container = document.getElementById('cartItemsContainer');
+            const summary = document.getElementById('summarySection');
+            const footer = document.getElementById('cartFooter');
+            
+            try {
+                const q = query(collection(db, "carts"), where("userId", "==", uid));
+                const snap = await getDocs(q);
+                
+                document.getElementById('loader').style.display = "none";
+                container.innerHTML = "";
+
+                if (snap.empty) {
+                    container.innerHTML = `
+                        <div class="empty-cart">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                            <h3 style="font-weight:800; font-size:22px; margin-bottom:8px;">Your bag is empty</h3>
+                            <p style="color:var(--text-muted); margin-bottom: 35px; font-size:15px;">Discover luxury pieces curated just for you.</p>
+                            <button onclick="location.href='index.html'" style="padding:20px 40px; background:var(--text-main); color:white; border:none; border-radius:22px; font-weight:800; width:100%; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">Start Shopping</button>
+                        </div>`;
+                    summary.style.display = "none";
+                    footer.style.display = "none";
+                    return;
+                }
+
+                let total = 0;
+                let itemCount = 0;
+
+                snap.forEach(d => {
+                    const item = d.data();
+                    const qty = parseInt(item.quantity) || 1;
+                    const price = Number(String(item.price).replace(/[^0-9.-]+/g,"")) || 0;
+                    total += (price * qty);
+                    itemCount++;
+                    
+                    container.innerHTML += `
+                        <div class="cart-item">
+                            <img src="${item.image}" class="item-img" onerror="this.src='https://via.placeholder.com/150'">
+                            <div class="item-details">
+                                <div>
+                                    <p class="item-name">${item.name}</p>
+                                    <p style="font-size:12px; color:var(--text-muted); margin-top:5px; font-weight:600;">Luxe Selection</p>
+                                </div>
+                                <div>
+                                    <p class="item-price">₹${(price * qty).toLocaleString('en-IN')}</p>
+                                    <div class="qty-control">
+                                        <span class="qty-btn" onclick="updateQty('${d.id}', ${qty - 1})">−</span>
+                                        <span class="qty-num">${qty}</span>
+                                        <span class="qty-btn" onclick="updateQty('${d.id}', ${qty + 1})">+</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="trash-btn" onclick="delItem('${d.id}')">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </div>
+                        </div>`;
+                });
+
+                summary.style.display = "block";
+                footer.style.display = "flex";
+                const formattedTotal = "₹" + total.toLocaleString('en-IN');
+                document.getElementById('orderTotal').innerText = formattedTotal;
+                document.getElementById('finalPrice').innerText = formattedTotal;
+                document.getElementById('footerPrice').innerText = formattedTotal;
+                document.getElementById('itemCountDisplay').innerText = itemCount + (itemCount > 1 ? " ITEMS" : " ITEM");
+
+            } catch (error) { console.error("Error loading cart:", error); }
+        }
+
+        window.updateQty = async (id, newQty) => {
+            if(newQty < 1) return;
+            try {
+                await updateDoc(doc(db, "carts", id), { quantity: newQty });
+                loadCartItems(auth.currentUser.uid);
+            } catch (e) { console.error(e); }
+        };
+
+        window.delItem = async (itemId) => {
+            if(confirm("Remove this masterpiece from your bag?")) {
+                try {
+                    await deleteDoc(doc(db, "carts", itemId));
+                    loadCartItems(auth.currentUser.uid);
+                } catch (e) { alert("Error removing item"); }
+            }
+        };
+    </script>
+</body>
+</html>

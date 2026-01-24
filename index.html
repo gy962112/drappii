@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Drapii Luxe | Elite Shopping</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --accent: #9f2089;
+            --accent-gradient: linear-gradient(135deg, #9f2089 0%, #ff5e9e 100%);
+            --glass: rgba(248, 235, 255, 0.75); 
+            --bg: #fdf8ff;
+            --text-main: #2d0c28;
+            --text-muted: #8e6d8a;
+            --card-radius: 24px;
+            --glass-border: rgba(159, 32, 137, 0.08);
+            --footer-bg: rgba(243, 220, 255, 0.95);
+            --footer-dark: #4a1340;
+            --max-width: 1200px; 
+        }
+
+        body { 
+            background-color: var(--bg); 
+            color: var(--text-main); 
+            overflow-x: hidden; 
+            display: none; 
+            min-height: 100vh;
+        }
+
+        .main-container {
+            width: 100%;
+            margin: 0 auto;
+            max-width: var(--max-width);
+            background: #fff;
+            min-height: 100vh;
+            box-shadow: 0 0 50px rgba(0,0,0,0.02);
+        }
+
+        @media (max-width: 768px) {
+            .main-container { max-width: 100%; box-shadow: none; }
+        }
+
+        #auth-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999; display: flex; 
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+
+        .loader {
+            width: 45px; height: 45px; border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--accent); border-radius: 50%;
+            animation: spin 1s linear infinite; margin-bottom: 15px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        header { 
+            background: var(--glass); 
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+            position: sticky; top: 0; z-index: 1000; padding: 15px 20px;
+            border-bottom: 1px solid var(--glass-border);
+            box-shadow: 0 4px 20px rgba(159, 32, 137, 0.03);
+        }
+
+        .header-content { max-width: var(--max-width); margin: 0 auto; width: 100%; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .brand-box { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .brand-logo { height: 38px; width: 38px; object-fit: cover; border-radius: 12px; box-shadow: 0 4px 12px rgba(159, 32, 137, 0.12); border: 1.5px solid #fff; }
+        .logo { font-size: 28px; font-weight: 800; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -1.5px; }
+        .header-actions { display: flex; gap: 18px; align-items: center; }
+        .icon-btn { position: relative; font-size: 22px; color: var(--text-main); cursor: pointer; }
+        .badge { position: absolute; top: -5px; right: -5px; background: var(--accent); color: white; font-size: 10px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 2px solid #fff; }
+
+        .search-container { position: relative; max-width: 600px; margin: 0 auto; }
+        .search-input { 
+            width: 100%; padding: 14px 18px 14px 48px; border: none; border-radius: 18px; 
+            font-size: 14px; background: rgba(255, 255, 255, 0.7); outline: none; 
+            border: 1px solid var(--glass-border);
+            transition: 0.3s;
+        }
+        .search-input:focus { background: #fff; border-color: var(--accent); box-shadow: 0 0 0 4px rgba(159, 32, 137, 0.05); }
+        .search-icon { position: absolute; left: 18px; top: 50%; transform: translateY(-50%); color: var(--accent); font-size: 16px; }
+
+        /* --- FIXED BANNER CSS --- */
+        .banner-container { 
+            width: 100%; 
+            position: relative; 
+            overflow: hidden; 
+            margin-bottom: 10px;
+        }
+        .slider-wrapper { 
+            display: flex; 
+            transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            width: 100%;
+        }
+        .banner { 
+            min-width: 100%; 
+            height: 350px; /* Desktop height */
+            position: relative; 
+            overflow: hidden; 
+            display: flex; 
+            align-items: center; 
+            flex-shrink: 0;
+        }
+        @media (max-width: 768px) { 
+            .banner { height: 200px; } /* Mobile height */
+        }
+
+        .banner-img { 
+            position: absolute; 
+            left: 0; top: 0; 
+            height: 100%; 
+            width: 100%; 
+            z-index: 1; 
+            object-fit: cover; /* Ensures image fills the area */
+        }
+        
+        .banner-content { 
+            position: absolute; left: 0; bottom: 0; padding: 25px; 
+            z-index: 5; color: white; width: 100%; 
+            background: linear-gradient(to top, rgba(0,0,0,0.5), transparent); 
+            display: flex; flex-direction: column; justify-content: flex-end;
+            height: 60%;
+        }
+
+        .slider-dots { 
+            position: absolute;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex; gap: 6px; z-index: 10;
+        }
+        .dot { width: 6px; height: 6px; background: rgba(255,255,255,0.4); border-radius: 50%; transition: 0.3s; }
+        .dot.active { background: #fff; width: 22px; border-radius: 10px; }
+
+        /* --- REST OF THE CSS (UNCHANGED) --- */
+        .filter-row { display: flex; overflow-x: auto; padding: 15px 20px; gap: 10px; scrollbar-width: none; }
+        .chip { padding: 10px 18px; border-radius: 14px; background: #fff; border: 1px solid var(--glass-border); font-size: 12px; font-weight: 700; color: var(--text-muted); white-space: nowrap; cursor: pointer; box-shadow: 0 4px 10px rgba(159, 32, 137, 0.02); }
+        .chip.active { background: var(--accent); color: #fff; border-color: var(--accent); box-shadow: 0 8px 15px rgba(159, 32, 137, 0.2); }
+        .section-label { padding: 25px 20px 15px; display: flex; justify-content: space-between; align-items: flex-end; }
+        .section-label h3 { font-size: 22px; font-weight: 800; color: #4a1340; letter-spacing: -0.5px; }
+        .section-label span { font-size: 13px; font-weight: 700; color: var(--accent); cursor: pointer; }
+        .cat-row { display: flex; overflow-x: auto; padding: 5px 20px; gap: 20px; scrollbar-width: none; }
+        .cat-card { background: none; border: none; display: flex; flex-direction: column; align-items: center; gap: 10px; min-width: 75px; cursor: pointer; }
+        .cat-circle { width: 75px; height: 75px; border-radius: 28px; background: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(159, 32, 137, 0.06); border: 1px solid rgba(255, 255, 255, 0.8); transition: 0.3s; overflow: hidden; }
+        .cat-card:active .cat-circle { transform: scale(0.9); background: var(--glass); }
+        .cat-circle img { width: 100%; height: 100%; object-fit: cover; } 
+        .cat-card span { font-size: 12px; font-weight: 700; color: var(--text-main); }
+        .product-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; padding: 15px 20px; margin-bottom: 20px; }
+        @media (max-width: 600px) { .product-grid { grid-template-columns: 1fr 1fr; gap: 12px; padding: 10px; } }
+        .p-card { background: #fff; border-radius: 28px; overflow: hidden; box-shadow: 0 12px 30px rgba(159, 32, 137, 0.04); position: relative; animation: fadeIn 0.6s ease; border: 1px solid var(--glass-border); transition: 0.3s; cursor: pointer; }
+        .p-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(159, 32, 137, 0.08); }
+        .p-img-box { width: 100%; aspect-ratio: 1/1.3; background: #fdfafd; overflow: hidden; position: relative;}
+        .p-img-box img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .p-details { padding: 18px; }
+        .p-name { font-size: 14px; font-weight: 600; color: var(--text-muted); margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .curr-price { font-size: 18px; font-weight: 800; color: var(--text-main); }
+        .stars { background: var(--accent); color: #fff; font-size: 10px; padding: 5px 10px; border-radius: 10px; font-weight: 700; width: fit-content; margin-top: 8px; box-shadow: 0 4px 10px rgba(159, 32, 137, 0.2); }
+        .amazon-footer { background: var(--footer-bg); backdrop-filter: blur(10px); color: var(--text-main); margin-top: 40px; padding-bottom: 100px; border-top: 1px solid var(--glass-border); }
+        .back-to-top { background: var(--accent); color: #fff; text-align: center; padding: 15px; font-size: 13px; font-weight: 700; cursor: pointer; }
+        .footer-content { padding: 40px 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 30px; max-width: var(--max-width); margin: 0 auto; }
+        .footer-column h4 { font-size: 15px; margin-bottom: 15px; font-weight: 800; color: var(--footer-dark); text-transform: uppercase; }
+        .footer-column ul { list-style: none; }
+        .footer-column ul li { font-size: 13px; margin-bottom: 12px; color: var(--text-muted); font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .footer-bottom { background: rgba(159, 32, 137, 0.05); padding: 30px 20px; text-align: center; border-top: 1px solid var(--glass-border); }
+        .footer-logo { height: 35px; border-radius: 10px; margin-bottom: 15px; }
+        .float-nav { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(45, 12, 40, 0.92); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); height: 70px; border-radius: 26px; display: flex; justify-content: space-around; align-items: center; z-index: 2000; box-shadow: 0 15px 40px rgba(45, 12, 40, 0.4); border: 1px solid rgba(255,255,255,0.15); }
+        .nav-link { color: rgba(255,255,255,0.5); text-decoration: none; display: flex; flex-direction: column; align-items: center; font-size: 10px; font-weight: 600; gap: 5px; transition: 0.3s; }
+        .nav-link.active { color: #fff; transform: translateY(-3px); }
+        .nav-link.seller-hub { color: #ffd700; }
+        .nav-link i { font-size: 22px; }
+    </style>
+</head>
+<body>
+    <div id="auth-overlay">
+        <div class="loader"></div>
+        <p style="font-weight: 600; color: #666;">Securing Connection...</p>
+    </div>
+
+    <div class="main-container">
+        <header>
+            <div class="header-content">
+                <div class="header-top">
+                    <a href="index.html" class="brand-box">
+                        <img src="https://i.ibb.co/MkJGfpLs/Screenshot-2026-01-01-17-32-52-86-680d03679600f7af0b4c700c6b270fe7.jpg" alt="Logo" class="brand-logo">
+                        <span class="logo">Drapii</span>
+                    </a>
+                    <div class="header-actions">
+                        <i class="fa-regular fa-heart icon-btn"></i>
+                        <a href="cart.html" class="icon-btn">
+                            <i class="fa-solid fa-bag-shopping"></i>
+                            <span class="badge" id="cartBadge">0</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="search-container">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Enter City (e.g. Agra) or Search...">
+                </div>
+            </div>
+        </header>
+
+        
+        <div class="filter-row">
+            <div class="chip active" onclick="sortProducts('all', this)">All</div>
+            <div class="chip" onclick="sortProducts('low', this)">Price: Low to High</div>
+            <div class="chip" onclick="sortProducts('high', this)">Price: High to Low</div>
+            <div class="chip" onclick="filterByPrice(500, this)">Under ₹500</div>
+            <div class="chip" onclick="filterByPrice(1000, this)">Under ₹1000</div>
+        </div>
+
+        <div class="banner-container">
+            <div class="slider-wrapper" id="sliderWrapper"></div>
+            <div class="slider-dots" id="sliderDots"></div>
+        </div>
+
+        <div class="section-label">
+            <h3>Designers</h3>
+            <span onclick="filterByCategory('All')">Explore All</span>
+        </div>
+        <div class="cat-row" id="categoryStrip"></div>
+
+        <div class="section-label">
+            <h3 id="displayTitle">Trending Now</h3>
+        </div>
+        
+        <div class="product-grid" id="productGrid"></div>
+
+        <footer class="amazon-footer">
+            <div class="back-to-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">BACK TO TOP</div>
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <ul>
+                        <li>About Drapii</li>
+                        <li>Careers</li>
+                        <li>Luxe Stories</li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Socials</h4>
+                    <ul>
+                        <li>Instagram</li>
+                        <li>Pinterest</li>
+                        <li>Twitter</li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Seller</h4>
+                    <ul>
+                        <li onclick="window.location.href='seller-auth.html'">Sell on Drapii</li>
+                        <li style="margin-top:12px;">Partner Hub</li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Support</h4>
+                    <ul>
+                        <li>Help Center</li>
+                        <li>Returns</li>
+                        <li>Size Guide</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <img src="https://i.ibb.co/MkJGfpLs/Screenshot-2026-01-01-17-32-52-86-680d03679600f7af0b4c700c6b270fe7.jpg" class="footer-logo">
+                <p>Made with <i class="fa-solid fa-heart" style="color:var(--accent)"></i> for Elite Shoppers</p>
+                <p style="margin-top:15px; font-size:10px; letter-spacing:1px;">© 2026 DRAPII LUXE PRIVATE LIMITED</p>
+            </div>
+        </footer>
+    </div>
+
+    <nav class="float-nav">
+        <a href="index.html" class="nav-link active"><i class="fa-solid fa-house-chimney"></i><span>Home</span></a>
+        <a href="seller-auth.html" class="nav-link seller-hub"><i class="fa-solid fa-warehouse"></i><span>Seller Hub</span></a>
+        <a href="orders.html" class="nav-link"><i class="fa-solid fa-receipt"></i><span>Orders</span></a>
+        <a href="profile.html" class="nav-link"><i class="fa-regular fa-user"></i><span>Account</span></a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, onSnapshot, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q",
+            authDomain: "fashora-flipkart.firebaseapp.com",
+            projectId: "fashora-flipkart",
+            storageBucket: "fashora-flipkart.firebasestorage.app",
+            messagingSenderId: "383843603520",
+            appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        function extractImageUrl(input) {
+            if (!input) return "https://via.placeholder.com/300"; 
+            let url = String(input);
+            if (url.includes('<img')) {
+                const match = url.match(/src="([^"]+)"/);
+                url = match ? match[1] : url;
+            }
+            url = url.replace(/['"\[\]]/g, "").trim();
+            return url.length > 5 ? url : "https://via.placeholder.com/300";
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('auth-overlay').style.display = 'none';
+                document.body.style.display = 'block';
+                updateCartBadge(user.uid);
+                listenToBanner(); 
+                listenToCategories(); 
+                loadProducts();
+                initCitySearch();
+            } else {
+                window.location.replace("signup.html");
+            }
+        });
+
+        let allProducts = [];
+        let filteredProducts = [];
+
+        function initCitySearch() {
+            const searchBox = document.getElementById('searchInput');
+            searchBox.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase().trim();
+                if (term === "") {
+                    filteredProducts = [...allProducts];
+                    document.getElementById('displayTitle').innerText = "Trending Now";
+                } else {
+                    filteredProducts = allProducts.filter(p => {
+                        const cityMatch = p.warehouseCity && p.warehouseCity.toLowerCase().includes(term);
+                        const nameMatch = p.name && p.name.toLowerCase().includes(term);
+                        return cityMatch || nameMatch;
+                    });
+                    if (term.length > 2) {
+                        document.getElementById('displayTitle').innerText = `Elite Stock in ${term.toUpperCase()}`;
+                    }
+                }
+                renderProducts(filteredProducts);
+            });
+        }
+
+        async function updateCartBadge(uid) {
+            const q = query(collection(db, "carts"), where("userId", "==", uid));
+            const snap = await getDocs(q);
+            document.getElementById('cartBadge').innerText = snap.size;
+        }
+
+        let currentSlide = 0;
+        function initSlider() {
+            const wrapper = document.getElementById('sliderWrapper');
+            const dots = document.querySelectorAll('.dot');
+            const totalSlides = document.querySelectorAll('.banner').length;
+            if(totalSlides <= 1) return;
+
+            setInterval(() => {
+                currentSlide = (currentSlide + 1) % totalSlides;
+                wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentSlide);
+                });
+            }, 4000);
+        }
+
+        function listenToBanner() {
+            onSnapshot(collection(db, "banners"), (snap) => {
+                const wrapper = document.getElementById('sliderWrapper');
+                const dotsContainer = document.getElementById('sliderDots');
+                wrapper.innerHTML = "";
+                dotsContainer.innerHTML = "";
+                if (snap.empty) return;
+
+                let indexCounter = 0;
+                snap.forEach((doc) => {
+                    const d = doc.data();
+                    const finalImg = extractImageUrl(d.image);
+                    const bannerHtml = `
+                        <div class="banner">
+                            <img src="${finalImg}" class="banner-img" onerror="this.src='https://via.placeholder.com/800x400?text=Banner+Error'">
+                            <div class="banner-content">
+                                <h2>${d.title || ""}</h2>
+                                <p>${d.subtitle || ""}</p>
+                            </div>
+                        </div>`;
+                    wrapper.insertAdjacentHTML('beforeend', bannerHtml);
+                    const dot = document.createElement('div');
+                    dot.className = indexCounter === 0 ? 'dot active' : 'dot';
+                    dotsContainer.appendChild(dot);
+                    indexCounter++;
+                });
+                currentSlide = 0;
+                if(indexCounter > 0) initSlider();
+            });
+        }
+
+        function listenToCategories() {
+            const catStrip = document.getElementById('categoryStrip');
+            onSnapshot(collection(db, "categories"), (snap) => {
+                catStrip.innerHTML = ""; 
+                snap.forEach((doc) => {
+                    const cat = doc.data();
+                    const finalImg = extractImageUrl(cat.image);
+                    const btn = document.createElement('button');
+                    btn.className = 'cat-card';
+                    btn.onclick = () => filterByCategory(cat.name);
+                    btn.innerHTML = `<div class="cat-circle"><img src="${finalImg}" onerror="this.src='https://via.placeholder.com/100'"></div><span>${cat.name}</span>`;
+                    catStrip.appendChild(btn);
+                });
+            });
+        }
+
+        async function loadProducts() {
+            onSnapshot(collection(db, "products"), (snap) => {
+                allProducts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                filteredProducts = [...allProducts];
+                renderProducts(filteredProducts);
+            });
+        }
+
+        function renderProducts(products) {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = "";
+            products.forEach(p => {
+                const finalImg = extractImageUrl(p.image); 
+                const card = document.createElement('div');
+                card.className = 'p-card';
+                card.onclick = () => window.location.href = `product.html?id=${p.id}`;
+                const cityInfo = p.warehouseCity ? `<div style="font-size: 10px; color: var(--accent); font-weight: 800; margin-bottom: 4px;"><i class="fa-solid fa-location-dot"></i> ${p.warehouseCity} Warehouse</div>` : "";
+                card.innerHTML = `
+                    <div class="p-img-box">
+                        <img src="${finalImg}" loading="lazy" onerror="this.src='https://via.placeholder.com/300?text=Product+Image'">
+                    </div>
+                    <div class="p-details">
+                        ${cityInfo}
+                        <p class="p-name">${p.name}</p>
+                        <span class="curr-price">₹${p.price}</span>
+                        <div class="stars">Premium Quality ★</div>
+                    </div>`;
+                grid.appendChild(card);
+            });
+        }
+
+        window.sortProducts = (type, el) => {
+            updateChips(el);
+            if(type === 'low') filteredProducts.sort((a,b) => a.price - b.price);
+            else if(type === 'high') filteredProducts.sort((a,b) => b.price - a.price);
+            else filteredProducts = [...allProducts];
+            renderProducts(filteredProducts);
+        };
+
+        window.filterByPrice = (maxPrice, el) => {
+            updateChips(el);
+            filteredProducts = allProducts.filter(p => p.price <= maxPrice);
+            renderProducts(filteredProducts);
+        };
+
+        window.filterByCategory = (cat) => {
+            filteredProducts = cat === 'All' ? allProducts : allProducts.filter(p => p.category === cat);
+            renderProducts(filteredProducts);
+        };
+
+        function updateChips(el) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+        }
+    </script>
+</body>
+</html>

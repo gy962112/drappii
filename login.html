@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Login | Drapii Luxe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --accent: #9f2089;
+            --accent-gradient: linear-gradient(135deg, #9f2089 0%, #ff5e9e 100%);
+            --text-main: #1a1a1a;
+            --text-muted: #757575;
+            --white: #ffffff;
+            --bg-soft: #fcfcfc;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg-soft); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+
+        .banner-container {
+            width: 100%; height: 220px;
+            background: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=800&q=80');
+            background-size: cover; background-position: center; position: relative;
+        }
+        .banner-container::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4), var(--bg-soft));
+        }
+
+        .auth-card {
+            background: var(--white); width: 92%; max-width: 420px;
+            margin: -50px 20px 40px; border-radius: 35px; padding: 35px 25px;
+            box-shadow: 0 30px 70px rgba(0,0,0,0.1); position: relative; z-index: 100;
+            text-align: center;
+        }
+
+        .logo-txt {
+            font-size: 42px; font-weight: 800;
+            background: var(--accent-gradient); -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent; letter-spacing: -2px; margin-bottom: 5px;
+        }
+        .sub-txt { font-size: 14px; color: var(--text-muted); margin-bottom: 25px; }
+
+        /* Mode Selector */
+        .auth-tabs { display: flex; gap: 10px; margin-bottom: 25px; background: #f0f0f0; padding: 5px; border-radius: 15px; }
+        .tab-btn { flex: 1; border: none; padding: 10px; border-radius: 12px; font-weight: 700; cursor: pointer; background: transparent; color: #777; transition: 0.3s; }
+        .tab-btn.active { background: #fff; color: var(--accent); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+
+        .input-group {
+            background: #f5f5f7; border-radius: 18px; padding: 16px 22px;
+            display: flex; align-items: center; margin-bottom: 15px;
+            border: 1.5px solid transparent; transition: 0.3s;
+        }
+        .input-group:focus-within { border-color: var(--accent); background: #fff; }
+        .input-group i { color: var(--accent); margin-right: 12px; width: 20px; }
+        .input-group span { font-weight: 800; margin-right: 10px; }
+        .input-group input { border: none; outline: none; font-size: 16px; width: 100%; font-weight: 600; background: transparent; }
+
+        .btn-main {
+            width: 100%; background: var(--text-main); color: white;
+            border: none; padding: 18px; border-radius: 18px;
+            font-size: 17px; font-weight: 800; cursor: pointer; transition: 0.3s;
+        }
+        .btn-main:active { transform: scale(0.96); }
+
+        .view { display: none; }
+        .view.active { display: block; animation: luxeUp 0.6s ease; }
+        @keyframes luxeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .otp-inputs { display: flex; justify-content: space-between; margin: 25px 0; gap: 8px; }
+        .otp-field { width: 14%; height: 50px; background: #f5f5f7; border: 1.5px solid transparent; border-radius: 12px; text-align: center; font-size: 22px; font-weight: 800; color: var(--accent); }
+
+        .footer-link { margin-top: 25px; font-size: 14px; color: var(--text-muted); }
+        .footer-link a { color: var(--accent); text-decoration: none; font-weight: 800; }
+
+        #toast {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.85); color: #fff; padding: 12px 25px; border-radius: 30px;
+            font-size: 13px; display: none; z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<div class="banner-container"></div>
+
+<div class="auth-card">
+    <div class="logo-txt">Drapii</div>
+    <div class="sub-txt">Welcome Back to Luxury</div>
+
+    <div class="auth-tabs" id="tab-container">
+        <button class="tab-btn active" onclick="switchMode('phone')">Phone</button>
+        <button class="tab-btn" onclick="switchMode('email')">Gmail</button>
+    </div>
+
+    <div id="view-phone" class="view active">
+        <div class="input-group">
+            <span>+91</span>
+            <input type="tel" id="login-phone" placeholder="Mobile Number" maxlength="10">
+        </div>
+        <div id="recaptcha-container"></div>
+        <button class="btn-main" id="send-btn">Get OTP</button>
+    </div>
+
+    <div id="view-email" class="view">
+        <div class="input-group">
+            <i class="fa-regular fa-envelope"></i>
+            <input type="email" id="login-email" placeholder="Gmail Address">
+        </div>
+        <div class="input-group">
+            <i class="fa-solid fa-lock"></i>
+            <input type="password" id="login-pass" placeholder="Password">
+        </div>
+        <button class="btn-main" id="email-login-btn">Login to Account</button>
+    </div>
+
+    <div id="view-otp" class="view">
+        <h3 style="font-weight: 800;">Verify OTP</h3>
+        <p style="font-size: 13px; color: var(--text-muted); margin: 10px 0 20px;">Sent to +91 <span id="num-label"></span></p>
+        <div class="otp-inputs">
+            <input type="tel" class="otp-field" maxlength="1">
+            <input type="tel" class="otp-field" maxlength="1">
+            <input type="tel" class="otp-field" maxlength="1">
+            <input type="tel" class="otp-field" maxlength="1">
+            <input type="tel" class="otp-field" maxlength="1">
+            <input type="tel" class="otp-field" maxlength="1">
+        </div>
+        <button class="btn-main" id="verify-btn">Verify & Enter</button>
+    </div>
+
+    <div class="footer-link">
+        Don't have an account? <a href="signup.html">Join Now</a>
+    </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+    const firebaseConfig = { 
+        apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q", 
+        authDomain: "fashora-flipkart.firebaseapp.com", 
+        projectId: "fashora-flipkart", 
+        storageBucket: "fashora-flipkart.firebasestorage.app", 
+        messagingSenderId: "383843603520", 
+        appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5" 
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let confirmRes = null;
+    const showToast = (m) => { 
+        const t = document.getElementById('toast'); 
+        t.innerText=m; t.style.display='block'; 
+        setTimeout(()=>t.style.display='none', 3000); 
+    };
+
+    window.switchMode = (mode) => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        if(mode === 'phone') {
+            document.getElementById('view-phone').classList.add('active');
+            document.querySelectorAll('.tab-btn')[0].classList.add('active');
+        } else {
+            document.getElementById('view-email').classList.add('active');
+            document.querySelectorAll('.tab-btn')[1].classList.add('active');
+        }
+    }
+
+    // --- GMAIL LOGIN ---
+    document.getElementById('email-login-btn').onclick = async () => {
+        const email = document.getElementById('login-email').value;
+        const pass = document.getElementById('login-pass').value;
+        if(!email || !pass) return showToast("Enter credentials");
+        try {
+            const res = await signInWithEmailAndPassword(auth, email, pass);
+            validateUser(res.user.uid);
+        } catch (e) { showToast("Wrong Email or Password"); }
+    };
+
+    // --- PHONE LOGIN ---
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'invisible' });
+    document.getElementById('send-btn').onclick = async () => {
+        const phone = "+91" + document.getElementById('login-phone').value;
+        if(phone.length !== 13) return showToast("Invalid Number");
+        try {
+            confirmRes = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+            document.getElementById('num-label').innerText = phone;
+            document.getElementById('view-phone').classList.remove('active');
+            document.getElementById('view-otp').classList.add('active');
+            document.getElementById('tab-container').style.display = 'none';
+        } catch (e) { showToast("OTP Error"); }
+    };
+
+    document.getElementById('verify-btn').onclick = async () => {
+        const code = Array.from(document.querySelectorAll('.otp-field')).map(f => f.value).join('');
+        try {
+            const res = await confirmRes.confirm(code);
+            validateUser(res.user.uid);
+        } catch (e) { showToast("Invalid OTP"); }
+    };
+
+    async function validateUser(uid) {
+        const snap = await getDoc(doc(db, "users", uid));
+        if (snap.exists()) {
+            window.location.href = "index.html";
+        } else {
+            showToast("No account found. Redirecting to Signup...");
+            setTimeout(() => window.location.href = "signup.html", 2000);
+        }
+    }
+
+    // OTP Auto-focus
+    document.querySelectorAll('.otp-field').forEach((f, i, arr) => {
+        f.oninput = () => { if(f.value && i < 5) arr[i+1].focus(); };
+    });
+</script>
+</body>
+</html>

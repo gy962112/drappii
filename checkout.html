@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Checkout | Drapii Luxe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+        :root { 
+            --accent: #9f2089; 
+            --accent-gradient: linear-gradient(135deg, #9f2089 0%, #ff5e9e 100%);
+            --glass: rgba(248, 235, 255, 0.8); 
+            --bg: #fdf8ff; 
+            --text-main: #2d0c28; 
+            --text-muted: #8e6d8a;
+            --luxe-shadow: 0 15px 40px rgba(159, 32, 137, 0.08); 
+            --card-radius: 28px;
+        }
+        * { margin:0; padding:0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); color: var(--text-main); padding-bottom: 120px; }
+        .nav-header { background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 18px 20px; display: flex; align-items: center; position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(159, 32, 137, 0.1); }
+        .nav-header i { font-size: 20px; margin-right: 18px; cursor: pointer; color: var(--accent); }
+        .nav-header span { font-weight: 800; font-size: 18px; letter-spacing: -0.5px; color: var(--text-main); }
+        .container { max-width: 500px; margin: 0 auto; padding: 15px; }
+        .section-card { background: white; margin-bottom: 15px; padding: 25px; border-radius: var(--card-radius); box-shadow: var(--luxe-shadow); border: 1px solid rgba(159, 32, 137, 0.03); }
+        .wh-badge { background: #fdf0ff; color: var(--accent); padding: 8px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; margin-bottom: 20px; display: inline-flex; align-items: center; gap: 6px; text-transform: uppercase; }
+        .section-title { font-size: 16px; font-weight: 800; margin-bottom: 20px; display: flex; align-items: center; gap: 12px; color: var(--text-main); }
+        .section-title i { color: var(--accent); font-size: 18px; }
+        .input-box { width: 100%; padding: 15px 18px; margin-bottom: 15px; border: 1.5px solid #f3eff4; border-radius: 18px; font-size: 14px; font-weight: 600; outline: none; background: #faf8fb; transition: 0.3s; color: var(--text-main); }
+        .input-box:focus { border-color: var(--accent); background: #fff; box-shadow: 0 5px 15px rgba(159, 32, 137, 0.05); }
+        .btn-location { background: #2874f0; color: white; border: none; width: 100%; padding: 15px; border-radius: 12px; font-weight: 700; margin-bottom: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.3s; font-size: 15px; }
+        .option { display: flex; align-items: center; padding: 20px; border: 2px solid #f5f0f6; border-radius: 24px; margin-bottom: 15px; cursor: pointer; transition: 0.3s; background: #fff; }
+        .option.active { border-color: var(--accent); background: #fdfaff; box-shadow: 0 10px 25px rgba(159, 32, 137, 0.1); }
+        .option i.main-icon { font-size: 26px; color: var(--accent); margin-right: 18px; }
+        .option b { display: block; font-size: 15px; margin-bottom: 2px; color: var(--text-main); }
+        .option span { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+        #loader-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(253, 248, 255, 0.95); backdrop-filter: blur(10px); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 2000; }
+        .spinner { width: 50px; height: 50px; border: 4px solid #eee; border-top: 4px solid var(--accent); border-radius: 50%; animation: spin 1s infinite linear; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .bottom-bar { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 500px; background: #2d0c28; padding: 16px 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 15px 35px rgba(45, 12, 40, 0.4); border-radius: 26px; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
+        .bottom-bar b { color: white; font-size: 22px; font-weight: 800; }
+        .bottom-bar span { color: #bca0ba; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-confirm { background: white; color: #2d0c28; border: none; padding: 14px 28px; border-radius: 18px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+    </style>
+</head>
+<body>
+
+    <div id="loader-overlay">
+        <div class="spinner"></div>
+        <p style="margin-top: 20px; font-weight: 800; color: var(--accent);">SECURELY PROCESSING...</p>
+    </div>
+
+    <div class="nav-header"><i class="fa-solid fa-chevron-left" onclick="history.back()"></i><span>Final Step</span></div>
+
+    <div class="container">
+        <div id="product-summary" class="section-card"></div>
+        <div class="section-card">
+            <div class="section-title"><i class="fa-solid fa-location-dot"></i> Shipping Destination</div>
+            <button class="btn-location" id="loc-btn" onclick="getLocation()"><i class="fa-solid fa-crosshairs"></i> <span id="btn-text">Use my location</span></button>
+            <input type="text" id="cust-name" class="input-box" placeholder="Recipient Full Name">
+            <input type="text" id="cust-address" class="input-box" placeholder="Complete Address">
+            <div style="display: flex; gap: 12px;">
+                <input type="text" id="cust-city" class="input-box" placeholder="City">
+                <input type="tel" id="cust-pincode" class="input-box" placeholder="Pincode">
+            </div>
+            <input type="tel" id="cust-phone" class="input-box" placeholder="10-Digit Phone Number">
+        </div>
+
+        <div class="section-card">
+            <div class="section-title"><i class="fa-solid fa-credit-card"></i> Payment Method</div>
+            <div class="option active" id="opt-cod" onclick="selectMethod('cod')">
+                <i class="fa-solid fa-truck-ramp-box main-icon"></i>
+                <div><b>Cash on Delivery</b><span>Pay on arrival</span></div>
+            </div>
+            <div class="option" id="opt-online" onclick="selectMethod('online')">
+                <i class="fa-solid fa-bolt-lightning main-icon"></i>
+                <div><b>Pay Online Now</b><span style="color:var(--accent);">Safe & Secure Checkout</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div><span>PAYABLE AMOUNT</span><br><b id="final-price">₹0</b></div>
+        <button class="btn-confirm" id="confirm-btn">Confirm Order</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, doc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q", 
+            authDomain: "fashora-flipkart.firebaseapp.com", 
+            projectId: "fashora-flipkart", 
+            storageBucket: "fashora-flipkart.firebasestorage.app", 
+            messagingSenderId: "383843603520", 
+            appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        let currentUID = null;
+        let selectedMethod = 'cod';
+        let checkoutProduct = JSON.parse(localStorage.getItem('checkoutItem')) || null;
+
+        onAuthStateChanged(auth, user => {
+            if (user) { 
+                currentUID = user.uid; 
+                initCheckout(); 
+                if(user.displayName) document.getElementById('cust-name').value = user.displayName;
+            } else { window.location.href = "login.html"; }
+        });
+
+        function initCheckout() {
+            if(!checkoutProduct) { alert("No product selected"); history.back(); return; }
+            document.getElementById('final-price').innerText = "₹" + checkoutProduct.price;
+            document.getElementById('product-summary').innerHTML = `
+                <div class="wh-badge"><i class="fa-solid fa-shield-check"></i> Verified Elite Seller</div>
+                <div style="display: flex; gap: 18px; align-items: center;">
+                    <img src="${checkoutProduct.image}" style="width: 75px; height: 75px; border-radius: 20px; object-fit: cover;">
+                    <div>
+                        <b style="font-size: 16px; display: block;">${checkoutProduct.name}</b>
+                        <p style="font-size: 13px; color: var(--text-muted);">Size: ${checkoutProduct.size || 'Free'}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        window.selectMethod = (method) => {
+            selectedMethod = method;
+            document.getElementById('opt-cod').classList.toggle('active', method === 'cod');
+            document.getElementById('opt-online').classList.toggle('active', method === 'online');
+        };
+
+        window.getLocation = () => {
+            const btnText = document.getElementById('btn-text');
+            const locBtn = document.getElementById('loc-btn');
+            btnText.innerText = "Locating...";
+            locBtn.style.opacity = "0.7";
+            navigator.geolocation.getCurrentPosition(async (pos) => {
+                try {
+                    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`);
+                    const data = await res.json();
+                    const addr = data.address;
+                    document.getElementById('cust-city').value = addr.city || addr.town || addr.village || "";
+                    document.getElementById('cust-pincode').value = addr.postcode || "";
+                    const fullAddr = [addr.road, addr.suburb, addr.neighbourhood].filter(Boolean).join(", ");
+                    document.getElementById('cust-address').value = fullAddr || data.display_name;
+                    btnText.innerText = "Location Synced!";
+                    locBtn.style.background = "#4caf50";
+                } catch (err) { alert("Error fetching address."); btnText.innerText = "Use my location"; }
+                locBtn.style.opacity = "1";
+            }, (err) => { alert("Enable GPS permission."); btnText.innerText = "Use my location"; locBtn.style.opacity = "1"; });
+        };
+
+        async function saveOrderToFirebase(paymentId = "COD") {
+            const loader = document.getElementById('loader-overlay');
+            loader.style.display = 'flex';
+
+            try {
+                let sId = checkoutProduct.sellerId;
+                let sCity = checkoutProduct.warehouseCity || "Headquarters";
+
+                // RE-FETCH SELLER ID FROM FIREBASE TO BE 100% SURE
+                if (!sId && checkoutProduct.productId) {
+                    const pRef = doc(db, "products", checkoutProduct.productId);
+                    const pSnap = await getDoc(pRef);
+                    if (pSnap.exists()) {
+                        sId = pSnap.data().sellerId;
+                        sCity = pSnap.data().warehouseCity || "Headquarters";
+                    }
+                }
+
+                if (!sId) { throw new Error("Seller information missing. Order cannot be routed."); }
+
+                await addDoc(collection(db, "orders"), {
+                    userId: currentUID,
+                    sellerId: sId,
+                    warehouseCity: sCity,
+                    customerName: document.getElementById('cust-name').value,
+                    customerPhone: document.getElementById('cust-phone').value, // MATCHED WITH SELLER PANEL
+                    address: document.getElementById('cust-address').value,
+                    city: document.getElementById('cust-city').value,
+                    pincode: document.getElementById('cust-pincode').value,
+                    price: Number(checkoutProduct.price),
+                    productName: checkoutProduct.name,
+                    productImg: checkoutProduct.image,
+                    size: checkoutProduct.size || "Free",
+                    paymentMethod: selectedMethod,
+                    paymentId: paymentId,
+                    status: "Pending",
+                    timestamp: Date.now()
+                });
+
+                localStorage.removeItem('checkoutItem');
+                window.location.href = "order-success.html";
+            } catch (e) {
+                console.error("Order Error: ", e);
+                alert("Order Failed: " + e.message);
+                loader.style.display = 'none';
+            }
+        }
+
+        document.getElementById('confirm-btn').onclick = async () => {
+            const name = document.getElementById('cust-name').value;
+            const phone = document.getElementById('cust-phone').value;
+            const address = document.getElementById('cust-address').value;
+            if(!name || phone.length < 10 || !address) { alert("Please fill all details correctly."); return; }
+
+            if(selectedMethod === 'online') {
+                const options = {
+                    "key": "YOUR_RAZORPAY_KEY_ID", 
+                    "amount": Number(checkoutProduct.price) * 100,
+                    "currency": "INR",
+                    "name": "Drapii Luxe",
+                    "description": checkoutProduct.name,
+                    "handler": function (response){ saveOrderToFirebase(response.razorpay_payment_id); },
+                    "prefill": { "name": name, "contact": phone },
+                    "theme": { "color": "#9f2089" }
+                };
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } else {
+                saveOrderToFirebase();
+            }
+        };
+    </script>
+</body>
+</html>
