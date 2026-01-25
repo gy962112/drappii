@@ -1,12 +1,20 @@
 {
   "name": "Drapii Luxe Elite",
   "short_name": "Drapii",
-  "start_url": "index.html",
+  "start_url": "https://gy962112.github.io/index.html",
   "display": "standalone",
   "background_color": "#fdf8ff",
   "theme_color": "#9f2089",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "https://gy962112.github.io/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://gy962112.github.io/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
   ]
 }
