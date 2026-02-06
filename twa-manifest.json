@@ -1,0 +1,51 @@
+{
+  "packageId": "com.drapii.app",
+  "host": "gy962112.github.io",
+  "name": "Drapii Luxe Elite",
+  "launcherName": "Drapii",
+  "display": "standalone",
+  "themeColor": "#2196F3",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#2196F3",
+  "enableNotifications": true,
+  "startUrl": "/index.html",
+  "iconUrl": "https://airhorner.com/images/touch/android-launchericon-512-512.png",
+  "maskableIconUrl": "https://airhorner.com/images/touch/android-maskableicon-512-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\Acer\\Desktop\\DrapiiAppFinal\\android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "2",
+  "appVersionCode": 2,
+  "shortcuts": [],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://airhorner.com/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://airhorner.com/",
+  "minSdkVersion": 21,
+  "orientation": "any",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "2"
+}
