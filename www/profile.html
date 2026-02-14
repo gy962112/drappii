@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>My Profile | Drapii Luxe</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --accent: #9f2089;
+            --accent-gradient: linear-gradient(135deg, #9f2089 0%, #ff5e9e 100%);
+            --glass: rgba(255, 255, 255, 0.8);
+            --bg: #fdf8ff; /* Soft Begni Background */
+            --text-main: #2d0c28; /* Dark Begni Black */
+            --text-muted: #8e6d8a;
+            --card-radius: 28px;
+            --nav-bg: #2d0c28;
+            --luxe-shadow: 0 15px 35px rgba(159, 32, 137, 0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg); padding-bottom: 110px; color: var(--text-main); overflow-x: hidden; }
+
+        .header-luxe {
+            background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            padding: 60px 20px 40px; text-align: center;
+            border-bottom: 1px solid rgba(159, 32, 137, 0.05);
+            border-radius: 0 0 40px 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+        .avatar-wrapper { position: relative; width: 110px; height: 110px; margin: 0 auto 15px; cursor: pointer; }
+        .avatar-circle { 
+            width: 110px; height: 110px; border-radius: 38px; 
+            background: #fff; border: 3px solid #fff; overflow: hidden;
+            box-shadow: 0 15px 35px rgba(159, 32, 137, 0.15);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar-circle i { font-size: 45px; color: var(--accent); }
+        .cam-btn { 
+            position: absolute; bottom: -2px; right: -2px; 
+            background: var(--accent-gradient); color: white;
+            width: 35px; height: 35px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; border: 3px solid #fff;
+            box-shadow: 0 5px 15px rgba(159, 32, 137, 0.3);
+        }
+
+        .user-info h2 { font-size: 26px; font-weight: 800; letter-spacing: -1px; margin-bottom: 5px; color: var(--text-main); }
+        .user-info p { font-size: 14px; color: var(--text-muted); font-weight: 600; }
+
+        /* Banners */
+        #sellerBanner, #becomeSellerBanner { 
+            display: none; margin: 20px; padding: 22px; 
+            border-radius: var(--card-radius); color: white; 
+            align-items: center; justify-content: space-between;
+            text-decoration: none; position: relative;
+            box-shadow: 0 15px 35px rgba(159, 32, 137, 0.15);
+        }
+        #sellerBanner { background: var(--text-main); } 
+        #becomeSellerBanner { background: var(--accent-gradient); } 
+
+        .banner-text h4 { font-size: 17px; font-weight: 800; margin-bottom: 2px; }
+        .banner-text p { font-size: 12px; opacity: 0.9; font-weight: 500; }
+
+        .menu-container { padding: 0 20px; }
+        .menu-label { font-size: 11px; font-weight: 800; color: var(--accent); text-transform: uppercase; letter-spacing: 2px; margin: 25px 5px 15px; }
+        
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .menu-item { 
+            background: #fff; display: flex; align-items: center; padding: 20px;
+            border-radius: 24px; text-decoration: none; color: var(--text-main);
+            border: 1px solid rgba(159, 32, 137, 0.05); transition: 0.3s;
+            box-shadow: var(--luxe-shadow); cursor: pointer;
+        }
+        .menu-item.full { grid-column: span 2; }
+        .menu-item i:first-child { width: 35px; font-size: 20px; color: var(--accent); }
+        .menu-item span { flex: 1; font-size: 14px; font-weight: 700; }
+
+        /* Modal Theme */
+        .modal { 
+            display: none; position: fixed; top:0; left:0; width:100%; height:100%; 
+            background: rgba(45, 12, 40, 0.6); backdrop-filter: blur(10px); z-index: 9999; 
+        }
+        .modal-content { 
+            background: #fff; width: 90%; max-width: 400px; position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            padding: 30px; border-radius: 35px; text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+        .modal-content input {
+            width: 100%; padding: 16px; margin: 12px 0;
+            border-radius: 18px; border: 1.5px solid #f3eff4;
+            background: #faf8fb; font-weight: 600; outline: none; transition: 0.3s;
+        }
+        .modal-content input:focus { border-color: var(--accent); background: #fff; }
+
+        .btn-luxe { 
+            width: 100%; padding: 16px; background: var(--text-main); color: #fff;
+            border: none; border-radius: 18px; font-weight: 800; cursor: pointer; margin-top: 10px;
+            box-shadow: 0 10px 20px rgba(45, 12, 40, 0.2);
+        }
+
+        .logout-btn { 
+            width: calc(100% - 40px); margin: 20px; padding: 18px; background: #fff1f5; color: #e11d48;
+            border: 1px solid #fee2e9; border-radius: 24px; font-weight: 800; cursor: pointer;
+            transition: 0.3s;
+        }
+        .logout-btn:active { transform: scale(0.95); }
+
+        /* Floating Nav */
+        .float-nav { 
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; background: var(--nav-bg);
+            height: 75px; border-radius: 28px;
+            display: flex; justify-content: space-around; align-items: center; z-index: 2000;
+            box-shadow: 0 20px 40px rgba(45, 12, 40, 0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-link { color: #8e6d8a; text-decoration: none; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; transition: 0.3s; }
+        .nav-link.active { color: #fff; }
+        .nav-link i { font-size: 22px; }
+        .nav-link span { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    </style>
+</head>
+<body>
+
+    <div class="header-luxe">
+        <div class="avatar-wrapper" onclick="document.getElementById('imageInput').click()">
+            <div class="avatar-circle" id="profileImageDisplay">
+                <i class="fa-solid fa-user-tie"></i>
+            </div>
+            <div class="cam-btn"><i class="fa-solid fa-camera"></i></div>
+        </div>
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        
+        <div class="user-info">
+            <h2 id="userName">Loading...</h2>
+            <p id="userContact">Please wait...</p>
+        </div>
+    </div>
+
+    <a href="seller-auth.html" id="sellerBanner">
+        <div class="banner-text">
+            <h4>Seller Dashboard</h4>
+            <p>Manage your boutique & earnings</p>
+        </div>
+        <i class="fa-solid fa-gem" style="font-size: 24px;"></i>
+    </a>
+
+    <div id="becomeSellerBanner" onclick="document.getElementById('sellerJoinModal').style.display='block'">
+        <div class="banner-text">
+            <h4>Become a Curator</h4>
+            <p>Start selling your fashion globally</p>
+        </div>
+        <i class="fa-solid fa-circle-arrow-right" style="font-size: 24px;"></i>
+    </div>
+
+    <div class="menu-container">
+        <div class="menu-label">Personal Space</div>
+        <a href="orders.html" class="menu-item full">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <span>My Orders</span>
+        </a>
+        
+        <div class="menu-grid">
+            <div class="menu-item" onclick="openEditModal()">
+                <i class="fa-solid fa-id-card"></i>
+                <span>Edit Profile</span>
+            </div>
+            <div class="menu-item" onclick="document.getElementById('aboutModal').style.display='block'">
+                <i class="fa-solid fa-bolt-lightning"></i>
+                <span>About Drapii</span>
+            </div>
+        </div>
+        
+        <div class="menu-label">Elite Support</div>
+        <div class="menu-grid">
+            <a href="https://wa.me/916387756278?text=Drapii%20Support" target="_blank" class="menu-item">
+                <i class="fa-solid fa-headset"></i>
+                <span>Concierge</span>
+            </a>
+            <div class="menu-item" onclick="alert('Privacy Policy Encrypted')">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Privacy</span>
+            </div>
+        </div>
+    </div>
+
+    <button class="logout-btn" id="logoutBtn"><i class="fa-solid fa-power-off"></i> &nbsp; Secure Sign Out</button>
+
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 10px;">Update Profile</h3>
+            <input type="text" id="editName" placeholder="Full Name">
+            <input type="tel" id="editPhone" placeholder="Phone Number">
+            <button class="btn-luxe" id="saveProfileBtn">Save Changes</button>
+            <p onclick="closeModal('editModal')" style="margin-top:20px; cursor:pointer; font-weight:700; color:var(--text-muted);">Go Back</p>
+        </div>
+    </div>
+
+    <div class="modal" id="aboutModal">
+        <div class="modal-content">
+            <i class="fa-solid fa-bolt-lightning" style="font-size: 45px; color: var(--accent); margin-bottom: 15px;"></i>
+            <h3 style="margin-bottom: 10px;">Drapii Luxe</h3>
+            <p>India's premium 3-hour fashion destination for elite curators and shoppers.</p>
+            <button class="btn-luxe" onclick="closeModal('aboutModal')">Close</button>
+        </div>
+    </div>
+
+    <div class="modal" id="sellerJoinModal">
+        <div class="modal-content">
+            <i class="fa-solid fa-gem" style="font-size: 40px; color: var(--accent); margin-bottom: 15px;"></i>
+            <h3>Partner with Drapii</h3>
+            <p>Ready to upgrade to a Seller account and start earning?</p>
+            <button class="btn-luxe" id="confirmSellerBtn">Upgrade Now</button>
+            <p onclick="closeModal('sellerJoinModal')" style="margin-top:20px; cursor:pointer; font-weight:700; color:var(--accent);">Maybe Later</p>
+        </div>
+    </div>
+
+    <nav class="float-nav">
+        <a href="index.html" class="nav-link"><i class="fa-solid fa-house"></i><span>Home</span></a>
+        <a href="seller-auth.html" class="nav-link"><i class="fa-solid fa-shop"></i><span>Seller Hub</span></a>
+        <a href="orders.html" class="nav-link"><i class="fa-solid fa-receipt"></i><span>Orders</span></a>
+        <a href="profile.html" class="nav-link active"><i class="fa-solid fa-user"></i><span>Account</span></a>
+    </nav>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+        import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-storage.js";
+
+        const firebaseConfig = { 
+            apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q", 
+            authDomain: "fashora-flipkart.firebaseapp.com", 
+            projectId: "fashora-flipkart", 
+            storageBucket: "fashora-flipkart.firebasestorage.app", 
+            messagingSenderId: "383843603520", 
+            appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5" 
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                document.getElementById('userName').innerText = user.displayName || "Luxe Member";
+                if (user.photoURL) document.getElementById('profileImageDisplay').innerHTML = `<img src="${user.photoURL}">`;
+                
+                const userDoc = await getDoc(doc(db, "users", user.uid));
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    document.getElementById('userContact').innerText = userData.phone || "+91 Contact Missing";
+                    if (userData.role === "seller") {
+                        document.getElementById('sellerBanner').style.display = 'flex';
+                        document.getElementById('becomeSellerBanner').style.display = 'none';
+                    } else {
+                        document.getElementById('becomeSellerBanner').style.display = 'flex';
+                    }
+                }
+            } else {
+                window.location.href = 'login.html';
+            }
+        });
+
+        document.getElementById('imageInput').onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const user = auth.currentUser;
+            const storageRef = ref(storage, `profiles/${user.uid}`);
+            try {
+                const snapshot = await uploadBytes(storageRef, file);
+                const url = await getDownloadURL(snapshot.ref);
+                await updateProfile(user, { photoURL: url });
+                await updateDoc(doc(db, "users", user.uid), { profilePic: url });
+                location.reload();
+            } catch (err) { alert("Error uploading image"); }
+        };
+
+        window.openEditModal = async () => {
+            const user = auth.currentUser;
+            const userDoc = await getDoc(doc(db, "users", user.uid));
+            document.getElementById('editName').value = user.displayName || "";
+            document.getElementById('editPhone').value = userDoc.data()?.phone || "";
+            document.getElementById('editModal').style.display = 'block';
+        };
+
+        document.getElementById('saveProfileBtn').onclick = async () => {
+            const user = auth.currentUser;
+            const newName = document.getElementById('editName').value;
+            const newPhone = document.getElementById('editPhone').value;
+            try {
+                await updateProfile(user, { displayName: newName });
+                await updateDoc(doc(db, "users", user.uid), { name: newName, phone: newPhone });
+                alert("Profile Updated!");
+                location.reload();
+            } catch (err) { alert("Update failed!"); }
+        };
+
+        document.getElementById('confirmSellerBtn').onclick = async () => {
+            const user = auth.currentUser;
+            await updateDoc(doc(db, "users", user.uid), { role: "seller" });
+            window.location.href = 'seller-auth.html';
+        };
+
+        document.getElementById('logoutBtn').onclick = () => signOut(auth).then(() => window.location.href='login.html');
+    </script>
+</body>
+</html>

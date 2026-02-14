@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Placed | Drapii Luxe</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --accent: #9f2089;
+            --accent-gradient: linear-gradient(135deg, #9f2089 0%, #ff5e9e 100%);
+            --premium-black: #2d0c28;
+            --delivery-red: #ff3366;
+            --bg-glass: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: radial-gradient(circle at top right, #fdf0f9, #f8f1f9);
+            text-align: center;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .success-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 45px 30px;
+            border-radius: 45px;
+            box-shadow: 0 35px 70px -15px rgba(159, 32, 137, 0.15);
+            max-width: 420px;
+            width: 100%;
+            border: 1px solid rgba(255, 255, 255, 0.7);
+            /* Paytm Style Entry */
+            animation: paytmPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes paytmPop {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .delivery-promise {
+            color: var(--delivery-red);
+            font-weight: 800;
+            font-size: 14px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: rgba(255, 51, 102, 0.08);
+            padding: 8px 18px;
+            border-radius: 50px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Paytm Style Ripple & Icon */
+        .icon-box {
+            position: relative;
+            width: 110px;
+            height: 110px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .ripple {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+            animation: rippleEffect 1.5s ease-out;
+        }
+
+        @keyframes rippleEffect {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        .icon-circle {
+            width: 90px;
+            height: 90px;
+            background: var(--accent-gradient);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            position: relative;
+            z-index: 2;
+            /* Paytm Success Bounce */
+            animation: iconBounce 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
+            box-shadow: 0 15px 30px rgba(159, 32, 137, 0.3);
+        }
+
+        @keyframes iconBounce {
+            0% { transform: scale(0); }
+            60% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .fa-check {
+            animation: checkDraw 0.5s ease-in-out 0.6s both;
+        }
+
+        @keyframes checkDraw {
+            0% { opacity: 0; transform: scale(0.5) rotate(-20deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+
+        h1 { 
+            color: var(--premium-black); 
+            font-size: 28px; 
+            font-weight: 800; 
+            margin-bottom: 12px;
+            letter-spacing: -1px;
+        }
+
+        p { 
+            color: #7a5e74; 
+            line-height: 1.6; 
+            margin-bottom: 30px; 
+            font-size: 15px;
+        }
+        
+        .order-badge {
+            background: #fdf0f9;
+            color: var(--accent);
+            padding: 10px 22px;
+            border-radius: 20px;
+            font-weight: 800;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 35px;
+            border: 1px solid rgba(159, 32, 137, 0.1);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn-track {
+            background: var(--premium-black);
+            color: white;
+            text-decoration: none;
+            padding: 18px;
+            border-radius: 22px;
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: 0.3s;
+            box-shadow: 0 15px 30px rgba(45, 12, 40, 0.2);
+        }
+
+        .btn-home {
+            background: transparent;
+            color: var(--premium-black);
+            text-decoration: none;
+            padding: 18px;
+            border-radius: 22px;
+            font-weight: 700;
+            font-size: 16px;
+            border: 2px solid rgba(45, 12, 40, 0.08);
+            transition: 0.3s;
+        }
+
+        .btn-track:active, .btn-home:active { transform: scale(0.96); }
+
+    </style>
+</head>
+<body>
+
+    <div class="success-card">
+        <div class="delivery-promise">
+            <i class="fa-solid fa-bolt-lightning"></i>
+            Express Delivery
+        </div>
+
+        <div class="icon-box">
+            <div class="ripple"></div>
+            <div class="icon-circle">
+                <i class="fa-solid fa-check"></i>
+            </div>
+        </div>
+
+        <h1>Order Successful!</h1>
+        <p>Your luxury package from <b>Drapii Luxe</b> is ready for express dispatch.</p>
+        
+        <div class="order-badge">
+            <i class="fa-solid fa-hashtag"></i>
+            ID: DRP-<span id="oid">774922</span>
+        </div>
+
+        <div class="action-buttons">
+            <a href="orders.html" class="btn-track">
+                <i class="fa-solid fa-location-crosshairs"></i> Track Order
+            </a>
+            <a href="index.html" class="btn-home">Continue Shopping</a>
+        </div>
+    </div>
+
+    <script>
+        function launchConfetti() {
+            var duration = 3 * 1000;
+            var end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#9f2089', '#ff5e9e']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#9f2089', '#ff5e9e']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        window.onload = () => {
+            // Slight delay for confetti to match the icon pop
+            setTimeout(launchConfetti, 500);
+            document.getElementById('oid').innerText = Math.floor(100000 + Math.random() * 900000);
+        };
+    </script>
+</body>
+</html>
