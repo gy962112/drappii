@@ -165,6 +165,7 @@
             try {
                 let sId = checkoutProduct.sellerId;
                 let sCity = checkoutProduct.warehouseCity || "Headquarters";
+                let sName = checkoutProduct.warehouseName || "Drapii Main Warehouse"; // Pickup point name
 
                 // RE-FETCH SELLER ID FROM FIREBASE TO BE 100% SURE
                 if (!sId && checkoutProduct.productId) {
@@ -173,6 +174,7 @@
                     if (pSnap.exists()) {
                         sId = pSnap.data().sellerId;
                         sCity = pSnap.data().warehouseCity || "Headquarters";
+                        sName = pSnap.data().warehouseName || sName;
                     }
                 }
 
@@ -182,8 +184,9 @@
                     userId: currentUID,
                     sellerId: sId,
                     warehouseCity: sCity,
+                    warehouseName: sName, // Pickup point name added here
                     customerName: document.getElementById('cust-name').value,
-                    customerPhone: document.getElementById('cust-phone').value, // MATCHED WITH SELLER PANEL
+                    customerPhone: document.getElementById('cust-phone').value,
                     address: document.getElementById('cust-address').value,
                     city: document.getElementById('cust-city').value,
                     pincode: document.getElementById('cust-pincode').value,
@@ -194,7 +197,7 @@
                     paymentMethod: selectedMethod,
                     paymentId: paymentId,
                     status: "Pending",
-                    timestamp: Date.now()
+                    timestamp: serverTimestamp() // Corrected for accurate date and time
                 });
 
                 localStorage.removeItem('checkoutItem');
