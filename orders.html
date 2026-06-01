@@ -66,21 +66,6 @@
         .brief-info h3 { font-size: 16px; font-weight: 700; color: var(--text-main); margin-bottom: 4px; }
         .price-tag { font-size: 18px; font-weight: 800; color: var(--accent); display: block; }
 
-        .stepper { margin: 30px 0; padding-left: 10px; }
-        .step { position: relative; padding-left: 40px; padding-bottom: 35px; border-left: 2.5px solid #f0e6ef; }
-        .step:last-child { border-left: 2.5px solid transparent; }
-        .step-dot {
-            position: absolute; left: -11px; top: 0; width: 20px; height: 20px; 
-            border-radius: 50%; background: #f0e6ef; border: 4px solid #fff; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-        }
-        .step.active .step-dot { background: var(--accent); box-shadow: 0 0 0 4px var(--accent-light); }
-        .step.completed .step-dot { background: var(--success); box-shadow: 0 0 0 4px #ebfbee; }
-        .step.completed { border-left-color: var(--success); }
-        
-        .step h4 { font-size: 15px; font-weight: 700; color: #ccc; margin-bottom: 2px; }
-        .step.active h4 { color: var(--text-main); }
-        .step.completed h4 { color: var(--success); }
-
         .tracking-overlay { 
             position: fixed; inset: 0; background: #fff; z-index: 2000; 
             display: none; flex-direction: column; 
@@ -146,9 +131,6 @@
 
     function getValidImage(data) {
         let imgUrl = data.productImg || data.productImage || data.image || data.img || "";
-        if (!imgUrl && data.items && data.items.length > 0) {
-            imgUrl = data.items[0].productImg || data.items[0].image || data.items[0].img || "";
-        }
         return (imgUrl && typeof imgUrl === 'string') ? imgUrl : "https://via.placeholder.com/300x400?text=Luxe+Item";
     }
 
@@ -160,23 +142,24 @@
     function loadOrders(uid) {
         const listDiv = document.getElementById('orders-list');
         const emptyState = document.getElementById('empty-state');
-        
-        // FIX: Removed orderBy from query to avoid Indexing error (Blank screen)
         const q = query(collection(db, "orders"), where("userId", "==", uid));
         
         onSnapshot(q, (snap) => {
             if (snap.empty) { emptyState.style.display = "block"; listDiv.innerHTML = ""; return; }
             emptyState.style.display = "none";
             
-            // Manual Sorting by timestamp (latest first)
             const sortedDocs = snap.docs.sort((a, b) => (b.data().timestamp || 0) - (a.data().timestamp || 0));
             
             listDiv.innerHTML = "";
             sortedDocs.forEach(d => {
                 const order = d.data();
                 const orderDocId = d.id;
-                const price = order.totalPrice || order.price || 0;
                 const status = order.status || 'Pending';
+                
+                // Date formatting
+                const dateObj = order.timestamp ? new Date(order.timestamp) : new Date();
+                const dateStr = dateObj.toLocaleDateString('en-IN');
+                const timeStr = dateObj.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
                 
                 const card = document.createElement('div');
                 card.className = 'order-card';
@@ -191,75 +174,45 @@
                         </div>
                         <div class="brief-info">
                             <h3>${order.productName || "Luxury Item"}</h3>
-                            <span class="price-tag">₹${price.toLocaleString('en-IN')}</span>
+                            <p style="font-size:12px; color:var(--text-muted); margin-top:5px;">Ordered on: ${dateStr} at ${timeStr}</p>
+                            <span class="price-tag">₹${(order.price || 0).toLocaleString('en-IN')}</span>
                         </div>
                     </div>
                 `;
-                card.onclick = () => showTracking(order, orderDocId);
+                card.onclick = () => showTracking(order, orderDocId, dateStr, timeStr);
                 listDiv.appendChild(card);
             });
-        }, (err) => {
-            console.error("Snapshot error:", err);
-            listDiv.innerHTML = `<p style='text-align:center; padding:20px; color:red;'>Error loading orders. Please refresh.</p>`;
         });
     }
 
-    window.showTracking = (order, docId) => {
+    window.showTracking = (order, docId, date, time) => {
         const view = document.getElementById('tracking-view');
         const details = document.getElementById('track-details');
         
-        const statuses = ["Pending", "Confirmed", "Packed", "Shipped", "Delivered"];
-        const currentStatus = order.status || "Pending";
-        const currentIndex = statuses.indexOf(currentStatus);
-
-        let stepperHtml = '<div class="stepper">';
-        if(currentStatus === "Cancelled") {
-            stepperHtml = '<div style="background:#fff; border: 2px solid #fee2e2; color:#ef4444; padding:20px; border-radius:24px; font-weight:800; text-align:center;"><i class="fa-solid fa-circle-xmark" style="font-size:30px; margin-bottom:10px; display:block;"></i> ORDER CANCELLED</div>';
-        } else {
-            statuses.forEach((s, i) => {
-                let stateClass = i < currentIndex ? "completed" : (i === currentIndex ? "active" : "");
-                stepperHtml += `
-                    <div class="step ${stateClass}">
-                        <div class="step-dot"></div>
-                        <h4>${s}</h4>
-                        <p style="font-size:11px; color:var(--text-muted);">${i <= currentIndex ? 'Status Updated' : 'Upcoming'}</p>
-                    </div>`;
-            });
-            stepperHtml += '</div>';
-        }
-
         details.innerHTML = `
             <div style="background:#fff; padding: 25px; border-radius: 30px; margin-bottom: 20px; text-align: center; border: 1px solid #f8f1f8;">
-                <h2 style="color:var(--accent); font-size: 26px; font-weight:800; margin-bottom:5px;">${currentStatus}</h2>
-                <p style="color:var(--text-muted); font-size:13px; font-weight:600;">ID: #${docId.slice(-8).toUpperCase()}</p>
+                <h2 style="color:var(--accent); font-size: 26px; font-weight:800; margin-bottom:5px;">${order.status}</h2>
+                <p style="color:var(--text-muted); font-size:13px; font-weight:600;">Ordered: ${date} | ${time}</p>
             </div>
-            ${stepperHtml}
             <div style="background:#fff; padding:20px; border-radius:28px; font-size:14px; line-height:1.6; border: 1px solid #f8f1f8;">
-                <p style="margin-bottom:10px;"><strong style="color:var(--text-muted);">Delivery to:</strong><br>${order.address || 'Registered Address'}</p>
-                <div style="margin-top:15px; padding-top:15px; border-top: 1px dashed #eee; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:700;">Total Amount:</span>
-                    <span style="color:var(--accent); font-weight:800; font-size:20px;">₹${(order.totalPrice || order.price || 0).toLocaleString('en-IN')}</span>
+                <p><strong>Pickup Point:</strong> ${order.warehouseName || 'Main Warehouse'}</p>
+                <p style="margin-top:10px;"><strong>Delivery to:</strong><br>${order.address}</p>
+                <div style="margin-top:15px; padding-top:15px; border-top: 1px dashed #eee; display:flex; justify-content:space-between;">
+                    <span style="font-weight:700;">Total:</span>
+                    <span style="color:var(--accent); font-weight:800; font-size:20px;">₹${(order.price || 0).toLocaleString('en-IN')}</span>
                 </div>
             </div>
-            ${(currentStatus === 'Pending' || currentStatus === 'Confirmed') ? `<button class="btn-cancel" onclick="cancelOrder('${docId}')">Cancel Order</button>` : ''}
+            ${(order.status === 'Pending') ? `<button class="btn-cancel" onclick="cancelOrder('${docId}')">Cancel Order</button>` : ''}
         `;
         view.classList.add('active');
     };
 
     window.cancelOrder = async (docId) => {
-        if (confirm("Are you sure you want to cancel this order?")) {
-            try {
-                const orderRef = doc(db, "orders", docId);
-                await updateDoc(orderRef, { status: 'Cancelled' });
-                alert("Order Cancelled successfully.");
-                closeTracking();
-            } catch(e) {
-                console.error("Cancel Error: ", e);
-                alert("Cancellation failed. Please try again.");
-            }
+        if (confirm("Cancel this order?")) {
+            await updateDoc(doc(db, "orders", docId), { status: 'Cancelled' });
+            closeTracking();
         }
     };
-
     window.closeTracking = () => document.getElementById('tracking-view').classList.remove('active');
 </script>
 </body>
