@@ -15,12 +15,15 @@ jobs:
           distribution: 'temurin'
 
       - name: Install Dependencies
-        run: npm install
+        run: |
+          npm install
+          npx cap sync android
 
       - name: Build with Gradle
         run: |
           cd android
           chmod +x gradlew
+          ./gradlew clean
           ./gradlew assembleRelease -x lint -x test
 
       - name: Upload APK
