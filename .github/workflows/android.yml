@@ -1,33 +1,4 @@
-name: Build Android APK
-on:
-  push:
-    branches: [ main ]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Install Dependencies
-        run: |
-          npm install
-          npx cap sync android
-
-      - name: Build with Gradle
-        run: |
-          cd android
-          chmod +x gradlew
-          ./gradlew clean
-          ./gradlew assembleRelease -x lint -x test
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Drapii-App-APK
-          path: android/app/build/outputs/apk/release/*.apk
+- name: set up JDK 21
+  uses: actions/setup-java@v4
+  with:
+    java-version: '21'
