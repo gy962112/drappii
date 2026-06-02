@@ -28,6 +28,7 @@
             padding: 40px 20px; 
         }
 
+        /* Desktop Luxury Fix */
         .container, #authSection {
             background: #ffffff;
             border-radius: 24px;
@@ -83,6 +84,7 @@
         .listing-section { background: #fff; padding: 25px; border-radius: 20px; border: 1px solid #f0f0f0; margin-bottom: 25px; }
         .section-title { font-size: 13px; color: var(--flipkart-blue); font-weight: 800; margin-bottom: 20px; border-left: 4px solid var(--flipkart-blue); padding-left: 12px; letter-spacing: 1px; }
 
+        /* Scrollbar styling */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
@@ -206,15 +208,13 @@
                     <option value="Suits">Unstitched Suits</option>
                     <option value="Western">Western Wear</option>
                     <option value="Jewellery">Jewellery & Acc.</option>
-                    <option value="Footwear">Footwear / Shoes</option>
+                    <option value="Books">Books</option>
                     <option value="NEW" style="color:var(--pink); font-weight:bold;">+ Add New Category</option>
                 </select>
                 <input type="text" id="newCatInput" class="hidden" placeholder="Enter New Category Name">
+                <div id="catSpecifics" class="hidden dynamic-specs"></div>
                 
-                <div id="catSpecifics" class="hidden" style="background: #f1f5f9; padding: 15px; border-radius: 14px; margin-top: 10px; border: 1px solid #e2e8f0;">
-                    <p style="font-size: 11px; font-weight: 800; color: var(--pink); margin-bottom: 10px; letter-spacing: 1px;">COMPLETE PRODUCT SPECIFICATIONS</p>
-                    <div id="dynamicFieldsContainer"></div>
-                </div>
+                <div id="customCategoryFields"></div>
 
                 <label>Brand Name</label>
                 <input type="text" id="pBrand" placeholder="Brand Name (e.g. Drapii Luxe)">
@@ -224,30 +224,21 @@
                 <textarea id="pDesc" placeholder="Description (Bullet points recommended)" style="height: 100px;"></textarea>
             </div>
 
-            <div class="listing-section">
-                <div class="section-title">VARIATIONS (SIZES & COLORS)</div>
-                <label>Available Sizes</label>
-                <div class="size-chips" id="sizeContainer">
-                    <div class="size-chip" onclick="toggleSize(this)">S</div>
-                    <div class="size-chip" onclick="toggleSize(this)">M</div>
-                    <div class="size-chip" onclick="toggleSize(this)">L</div>
-                    <div class="size-chip" onclick="toggleSize(this)">XL</div>
-                    <div class="size-chip" onclick="toggleSize(this)">XXL</div>
-                    <div class="size-chip" onclick="toggleSize(this)">Free Size</div>
+            <div class="listing-section" id="variationSection">
+                <div class="section-title">VARIATIONS (SIZES & SIMILAR PRODUCTS)</div>
+                <div id="sizeSelectionBlock">
+                    <label>Available Sizes</label>
+                    <div class="size-chips" id="sizeContainer">
+                        <div class="size-chip" onclick="toggleSize(this)">S</div>
+                        <div class="size-chip" onclick="toggleSize(this)">M</div>
+                        <div class="size-chip" onclick="toggleSize(this)">L</div>
+                        <div class="size-chip" onclick="toggleSize(this)">XL</div>
+                        <div class="size-chip" onclick="toggleSize(this)">XXL</div>
+                        <div class="size-chip" onclick="toggleSize(this)">Free Size</div>
+                    </div>
                 </div>
-                <label>Available Colors</label>
-                <div class="color-chips" id="colorContainer">
-                    <div class="color-chip" onclick="toggleColor(this)">Red</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Blue</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Green</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Black</div>
-                    <div class="color-chip" onclick="toggleColor(this)">White</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Pink</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Yellow</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Multi</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Grey</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Brown</div>
-                </div>
+                <label>Link Similar Products / Color Variants</label>
+                <textarea id="pSimilarProducts" placeholder="Paste variant Product IDs or Image URLs (Separate by comma ',') to show 'Similar Products' on checkout" style="height: 80px;"></textarea>
             </div>
 
             <div class="listing-section">
@@ -313,52 +304,6 @@
         let sellerId = "";
         let sellerCity = ""; 
         let selectedSizes = [];
-        let selectedColors = [];
-
-        // Notification variable to track previous count
-        let lastOrderCount = -1;
-
-        const categoryConfigs = {
-            "Saree": {
-                "Fabric": ["Cotton", "Silk", "Georgette", "Chiffon", "Net", "Organza", "Linen", "Banarasi"],
-                "Work": ["Zari", "Embroidery", "Printed", "Stone Work", "Lace Border", "Plain", "Mirror Work"],
-                "Blouse": ["Stitched", "Unstitched", "Separated", "No Blouse"],
-                "Occasion": ["Wedding", "Casual", "Party", "Festive"]
-            },
-            "Kurti": {
-                "Fabric": ["Rayon", "Cotton", "Crepe", "Georgette", "Silk", "Linen"],
-                "Pattern": ["Anarkali", "Straight", "A-Line", "Short Kurti", "Angrakha"],
-                "Sleeve": ["Full Sleeve", "3/4 Sleeve", "Half Sleeve", "Sleeveless"],
-                "Length": ["Knee Length", "Calf Length", "Ankle Length"]
-            },
-            "Shirt": {
-                "Fabric": ["Cotton", "Linen", "Denim", "Satin", "Polyester", "Checkered"],
-                "Fit": ["Slim Fit", "Regular Fit", "Relaxed Fit", "Oversized"],
-                "Sleeve": ["Full Sleeve", "Half Sleeve"],
-                "Collar": ["Spread", "Button Down", "Mandarin", "Club"]
-            },
-            "Pant": {
-                "Type": ["Chinos", "Trousers", "Formal", "Jeans", "Joggers"],
-                "Fabric": ["Cotton Blend", "Denim", "Stretchable Silk", "Wool"],
-                "Fit": ["Slim Fit", "Skinny", "Straight Leg", "Tapered"]
-            },
-            "Child": {
-                "Age Group": ["0-6 Months", "6-12 Months", "1-2 Years", "2-3 Years", "3-5 Years", "5-7 Years", "7-10 Years", "10-12 Years", "12-15 Years"],
-                "Fabric": ["Cotton", "Hosiery", "Soft Denim", "Silk Blend"],
-                "Type": ["Frock", "T-Shirt & Shorts", "Suit", "Nightwear", "Ethic Wear"]
-            },
-            "Footwear": {
-                "Material": ["Synthetic Leather", "Canvas", "Mesh", "Rubber", "PVC", "Suede"],
-                "Sole": ["Airmix", "Rubber", "PVC", "TPR", "Leather Sole"],
-                "Type": ["Sneakers", "Loafers", "Formal Shoes", "Sandals", "Heels", "Boots"],
-                "Closure": ["Lace-Up", "Slip-On", "Velcro", "Buckle"]
-            },
-            "Jewellery": {
-                "Material": ["Gold Plated", "Silver Plated", "Oxidised", "Beads", "Pearl", "American Diamond"],
-                "Type": ["Necklace Set", "Earrings", "Bangles", "Ring", "Anklet", "Maang Tikka"],
-                "Occasion": ["Bridal", "Everyday", "Party Wear"]
-            }
-        };
 
         window.login = async () => {
             const email = document.getElementById('logEmail').value;
@@ -375,11 +320,19 @@
             const img = document.getElementById('regWhUrl').value;
             const email = document.getElementById('regEmail').value;
             const pass = document.getElementById('regPass').value;
+
             if(!email || !pass || !name) return alert("Fill all fields");
+
             try {
                 const res = await createUserWithEmailAndPassword(auth, email, pass);
                 await setDoc(doc(db, "sellers", res.user.uid), {
-                    warehouseName: name, warehouseCity: city, address: addr, warehouseImg: img, email: email, role: 'seller', createdAt: serverTimestamp()
+                    warehouseName: name,
+                    warehouseCity: city,
+                    address: addr,
+                    warehouseImg: img,
+                    email: email,
+                    role: 'seller',
+                    createdAt: serverTimestamp()
                 });
             } catch (e) { alert("Signup Error: " + e.message); }
         };
@@ -389,21 +342,18 @@
         onAuthStateChanged(auth, async (user) => {
             const loader = document.getElementById('loader');
             if (user) {
-                // Request notification permission on login
-                if (Notification.permission !== 'granted') {
-                    Notification.requestPermission();
-                }
-
                 const sDoc = await getDoc(doc(db, "sellers", user.uid));
                 if(sDoc.exists()){
-                    sellerId = user.uid; const d = sDoc.data(); sellerCity = d.warehouseCity;
+                    sellerId = user.uid;
+                    const d = sDoc.data();
+                    sellerCity = d.warehouseCity;
                     document.getElementById('welcomeName').innerText = d.warehouseName;
                     document.getElementById('displayWhCity').innerText = sellerCity;
                     document.getElementById('displayWhImg').src = d.warehouseImg;
                     document.getElementById('displayWhAddr').innerText = d.address;
                     document.getElementById('authSection').style.display = 'none';
                     document.getElementById('dashboardSection').style.display = 'block';
-                    loadStats(); 
+                    loadStats();
                     loadSellerProducts();
                 } else { await signOut(auth); alert("Not a seller account"); }
             } else {
@@ -420,77 +370,63 @@
             document.getElementById('signupTabBtn').classList.toggle('active', m==='signup');
         };
 
-        window.toggleSize = (el) => { 
-            el.classList.toggle('selected'); 
-            const s = el.innerText; 
-            if(selectedSizes.includes(s)) {
-                selectedSizes = selectedSizes.filter(x => x !== s);
-            } else {
-                selectedSizes.push(s);
-            }
-        };
-
-        window.toggleColor = (el) => { 
-            el.classList.toggle('selected'); 
-            const c = el.innerText; 
-            if(selectedColors.includes(c)) {
-                selectedColors = selectedColors.filter(x => x !== c);
-            } else {
-                selectedColors.push(c);
-            }
-        };
-
+        window.toggleSize = (el) => { el.classList.toggle('selected'); const s = el.innerText; selectedSizes.includes(s) ? selectedSizes = selectedSizes.filter(x=>x!==s) : selectedSizes.push(s); };
         window.checkNewCity = (val) => { document.getElementById('newCityInput').classList.toggle('hidden', val !== 'NEW_CITY'); };
-
-        window.checkNewCat = (val) => {
-            const input = document.getElementById('newCatInput');
-            const specificsDiv = document.getElementById('catSpecifics');
-            const container = document.getElementById('dynamicFieldsContainer');
-            const sizeContainer = document.getElementById('sizeContainer');
+        
+        // Dynamic Fields Based on Selection
+        window.checkNewCat = (val) => { 
+            document.getElementById('newCatInput').classList.toggle('hidden', val !== 'NEW'); 
             
-            container.innerHTML = "";
-            selectedSizes = []; 
-            selectedColors = [];
-            document.querySelectorAll('.size-chip, .color-chip').forEach(chip => chip.classList.remove('selected'));
+            const customFieldsContainer = document.getElementById('customCategoryFields');
+            const sizeSelectionBlock = document.getElementById('sizeSelectionBlock');
+            customFieldsContainer.innerHTML = ""; 
 
-            if(val === 'Footwear') {
-                sizeContainer.innerHTML = `
-                    <div class="size-chip" onclick="toggleSize(this)">6</div>
-                    <div class="size-chip" onclick="toggleSize(this)">7</div>
-                    <div class="size-chip" onclick="toggleSize(this)">8</div>
-                    <div class="size-chip" onclick="toggleSize(this)">9</div>
-                    <div class="size-chip" onclick="toggleSize(this)">10</div>
-                `;
+            // Show size block only for clothing like Shirt, Kurti, Western Wear
+            if (val === "Shirt" || val === "Kurti" || val === "Western" || val === "Child") {
+                sizeSelectionBlock.style.display = "block";
             } else {
-                sizeContainer.innerHTML = `
-                    <div class="size-chip" onclick="toggleSize(this)">S</div>
-                    <div class="size-chip" onclick="toggleSize(this)">M</div>
-                    <div class="size-chip" onclick="toggleSize(this)">L</div>
-                    <div class="size-chip" onclick="toggleSize(this)">XL</div>
-                    <div class="size-chip" onclick="toggleSize(this)">XXL</div>
-                    <div class="size-chip" onclick="toggleSize(this)">Free Size</div>
-                `;
+                sizeSelectionBlock.style.display = "none";
+                selectedSizes = []; 
+                document.querySelectorAll('.size-chip').forEach(el => el.classList.remove('selected'));
             }
 
-            if(val === 'NEW') {
-                input.classList.remove('hidden'); specificsDiv.classList.add('hidden');
-            } else if(categoryConfigs[val]) {
-                input.classList.add('hidden'); specificsDiv.classList.remove('hidden');
-                Object.entries(categoryConfigs[val]).forEach(([fieldName, options]) => {
-                    const lbl = document.createElement('label');
-                    lbl.innerText = fieldName;
-                    lbl.style.fontSize = "10px";
-                    const sel = document.createElement('select');
-                    sel.className = "cat-extra-field";
-                    sel.dataset.fieldname = fieldName;
-                    let optionsHTML = `<option value="">Select ${fieldName}</option>`;
-                    options.forEach(opt => { optionsHTML += `<option value="${opt}">${opt}</option>`; });
-                    sel.innerHTML = optionsHTML;
-                    container.appendChild(lbl);
-                    container.appendChild(sel);
-                });
-            } else {
-                input.classList.add('hidden'); specificsDiv.classList.add('hidden');
+            // Category Specific Fields Condition
+            if(val === "Pant") {
+                customFieldsContainer.innerHTML = `
+                    <label>Waist Size (Kamar in Inches)</label>
+                    <input type="text" id="pWaist" placeholder="e.g. 28, 30, 32, 34, 36">
+                    <label>Pant Length (Inches)</label>
+                    <input type="number" id="pLength" placeholder="e.g. 40">
+                    <label>Fabric Material</label>
+                    <input type="text" id="pFabric" placeholder="e.g. Cotton, Denim, Lycra">
+                `;
+            } else if(val === "Books") {
+                customFieldsContainer.innerHTML = `
+                    <label>Author Name</label>
+                    <input type="text" id="bAuthor" placeholder="e.g. Premchand">
+                    <label>ISBN Number</label>
+                    <input type="text" id="bIsbn" placeholder="13-digit ISBN number">
+                    <label>Publisher</label>
+                    <input type="text" id="bPublisher" placeholder="e.g. Penguin Books">
+                    <label>Language</label>
+                    <input type="text" id="bLanguage" placeholder="e.g. Hindi, English">
+                `;
+            } else if(val === "Saree") {
+                customFieldsContainer.innerHTML = `
+                    <label>Saree Length (Meters)</label>
+                    <input type="text" id="sLength" placeholder="e.g. 5.5 Meters">
+                    <label>Blouse Piece Included?</label>
+                    <select id="sBlouse"><option value="Yes">Yes</option><option value="No">No</option></select>
+                    <label>Work / Fabric Type</label>
+                    <input type="text" id="sWork" placeholder="e.g. Banarasi Silk, Georgette embroidered">
+                `;
+            } else if(val === "Jewellery") {
+                customFieldsContainer.innerHTML = `
+                    <label>Material Type</label>
+                    <input type="text" id="jMaterial" placeholder="e.g. Gold Plated, Silver, Brass">
+                    <label>Jewellery Type</label>
+                    <input type="text" id="jType" placeholder="e.g. Necklace, Earrings, Ring">
+                `;
             }
         };
 
@@ -512,16 +448,6 @@
 
         window.uploadProduct = async () => {
             const btn = document.getElementById('uploadBtn');
-            let categoryValue = document.getElementById('pCategory').value;
-            if(categoryValue === 'NEW') categoryValue = document.getElementById('newCatInput').value;
-            if(!categoryValue) return alert("Select Category");
-            if(selectedSizes.length === 0) return alert("Select at least one size");
-
-            const extraFields = {};
-            document.querySelectorAll('.cat-extra-field').forEach(sel => {
-                if(sel.value) extraFields[sel.dataset.fieldname] = sel.value;
-            });
-
             btn.disabled = true; btn.innerText = "Launching...";
             try {
                 const file = document.getElementById('pImg').files[0];
@@ -531,129 +457,168 @@
                     await uploadBytes(sRef, file);
                     finalUrl = await getDownloadURL(sRef);
                 }
+                
+                const chosenCategory = document.getElementById('pCategory').value;
+                const finalCategory = chosenCategory === 'NEW' ? document.getElementById('newCatInput').value : chosenCategory;
+
+                // Dynamic Category Extra Metadata Collection
+                let categoryMetadata = {};
+                if(chosenCategory === "Pant") {
+                    categoryMetadata.waist = document.getElementById('pWaist') ? document.getElementById('pWaist').value : "";
+                    categoryMetadata.length = document.getElementById('pLength') ? document.getElementById('pLength').value : "";
+                    categoryMetadata.fabric = document.getElementById('pFabric') ? document.getElementById('pFabric').value : "";
+                } else if(chosenCategory === "Books") {
+                    categoryMetadata.author = document.getElementById('bAuthor') ? document.getElementById('bAuthor').value : "";
+                    categoryMetadata.isbn = document.getElementById('bIsbn') ? document.getElementById('bIsbn').value : "";
+                    categoryMetadata.publisher = document.getElementById('bPublisher') ? document.getElementById('bPublisher').value : "";
+                    categoryMetadata.language = document.getElementById('bLanguage') ? document.getElementById('bLanguage').value : "";
+                } else if(chosenCategory === "Saree") {
+                    categoryMetadata.sareeLength = document.getElementById('sLength') ? document.getElementById('sLength').value : "";
+                    categoryMetadata.blouse = document.getElementById('sBlouse') ? document.getElementById('sBlouse').value : "";
+                    categoryMetadata.work = document.getElementById('sWork') ? document.getElementById('sWork').value : "";
+                } else if(chosenCategory === "Jewellery") {
+                    categoryMetadata.material = document.getElementById('jMaterial') ? document.getElementById('jMaterial').value : "";
+                    categoryMetadata.jewelleryType = document.getElementById('jType') ? document.getElementById('jType').value : "";
+                }
+
+                // Split variant URLs/IDs by comma and clean spaces
+                const rawVariants = document.getElementById('pSimilarProducts').value;
+                const variantsArray = rawVariants ? rawVariants.split(',').map(item => item.trim()).filter(item => item !== "") : [];
+
                 await addDoc(collection(db, "products"), {
                     name: document.getElementById('pName').value,
                     brand: document.getElementById('pBrand').value,
-                    category: categoryValue,
-                    specifications: extraFields,
+                    category: finalCategory,
+                    categoryDetails: categoryMetadata,
                     mrp: Number(document.getElementById('pMrp').value),
                     price: Number(document.getElementById('pPrice').value),
                     stock: Number(document.getElementById('pStock').value),
                     sku: document.getElementById('pSku').value,
                     image: finalUrl,
                     sizes: selectedSizes,
-                    colors: selectedColors,
+                    similarProducts: variantsArray,
                     sellerId: sellerId,
                     warehouseCity: sellerCity,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    desc: document.getElementById('pDesc').value || ""
                 });
                 alert("Product Launched!"); location.reload();
             } catch (e) { alert(e.message); btn.disabled = false; btn.innerText = "Launch Product"; }
         };
 
         function loadSellerProducts() {
-            if(!sellerId) return;
             const q = query(collection(db, "products"), where("sellerId", "==", sellerId));
             onSnapshot(q, (snap) => {
                 let html = "";
                 snap.forEach(docSnap => {
                     const p = docSnap.data();
-                    html += `<div class="product-item"><img src="${p.image.split(',')[0]}"><div class="product-info"><h5>${p.name}</h5><p>₹${p.price} | ${p.category}</p></div><button class="delete-btn" style="color: #ef4444; background: #fee2e2; border: none; padding: 10px; border-radius: 10px; cursor: pointer;" onclick="deleteMyProduct('${docSnap.id}')"><i class="fa-solid fa-trash"></i></button></div>`;
+                    html += `<div class="product-item">
+                                <img src="${p.image.split(',')[0]}">
+                                <div class="product-info" style="flex:1;">
+                                    <h5>${p.name}</h5>
+                                    <p>₹${p.price} | Stock: ${p.stock || 0}</p>
+                                </div>
+                                <div style="display:flex; gap:8px;">
+                                    <button class="edit-btn" style="color: #0284c7; background: #e0f2fe; border: none; padding: 10px; border-radius: 10px; cursor: pointer;" onclick="editMyProduct('${docSnap.id}', '${escapeHtml(p.name)}', ${p.mrp || 0}, ${p.price}, ${p.stock || 0}, '${escapeHtml(p.sku || '')}', '${escapeHtml(p.desc || '')}')">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button class="delete-btn" style="color: #ef4444; background: #fee2e2; border: none; padding: 10px; border-radius: 10px; cursor: pointer;" onclick="deleteMyProduct('${docSnap.id}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                             </div>`;
                 });
                 document.getElementById('sellerProductList').innerHTML = html || "<p>No products.</p>";
             });
         }
 
+        function escapeHtml(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        window.editMyProduct = async (id, currentName, currentMrp, currentPrice, currentStock, currentSku, currentDesc) => {
+            const newName = prompt("Edit Product Title:", currentName);
+            if (newName === null) return; 
+
+            const newMrp = prompt("Edit MRP (₹):", currentMrp);
+            if (newMrp === null) return;
+
+            const newPrice = prompt("Edit Selling Price (₹):", currentPrice);
+            if (newPrice === null) return;
+
+            const newStock = prompt("Edit In Stock Quantity:", currentStock);
+            if (newStock === null) return;
+
+            const newSku = prompt("Edit SKU ID:", currentSku);
+            if (newSku === null) return;
+
+            const newDesc = prompt("Edit Description:", currentDesc);
+            if (newDesc === null) return;
+
+            if(!newName.trim() || isNaN(newMrp) || isNaN(newPrice) || isNaN(newStock)) {
+                return alert("Invalid details! Update failed.");
+            }
+
+            try {
+                await updateDoc(doc(db, "products", id), {
+                    name: newName.trim(),
+                    mrp: Number(newMrp),
+                    price: Number(newPrice),
+                    stock: Number(newStock),
+                    sku: newSku.trim(),
+                    desc: newDesc.trim()
+                });
+                alert("Product details updated successfully!");
+            } catch (e) {
+                alert("Update Error: " + e.message);
+            }
+        };
+
         window.deleteMyProduct = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
 
-        // Real-time Live Orders & Payout Logic
         async function loadStats() {
-            if(!sellerId) return;
             const q = query(collection(db, "orders"), where("sellerId", "==", sellerId));
-            
             onSnapshot(q, (snap) => {
-                const currentCount = snap.size;
-                
-                // TRIGGER NOTIFICATION LOGIC
-                if (lastOrderCount !== -1 && currentCount > lastOrderCount) {
-                    if (Notification.permission === 'granted') {
-                        new Notification("New Order Received! 📦", {
-                            body: "You have a new order in your Warehouse Panel.",
-                            icon: "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/svgs/solid/warehouse.svg"
-                        });
-                    }
-                }
-                lastOrderCount = currentCount;
-
-                document.getElementById('totalOrdersCount').innerText = currentCount;
-                
-                let earnings = 0; 
-                let html = "";
-                
+                document.getElementById('totalOrdersCount').innerText = snap.size;
+                let earnings = 0; let html = "";
                 snap.forEach(docSnap => {
                     const o = docSnap.data();
-                    const docId = docSnap.id;
+                    if(o.status === 'Delivered') earnings += o.price * 0.8;
                     
-                    if(o.status === 'Delivered') {
-                        earnings += (Number(o.price) || 0) * 0.8;
+                    let rawImg = o.image || o.productImage || o.pImg || o.imgUrl || o.img || o.productImg || o.thumb || "";
+                    let orderImgUrl = 'https://via.placeholder.com/150';
+                    
+                    if(rawImg && String(rawImg).trim() !== "") {
+                        orderImgUrl = String(rawImg).split(',')[0].trim();
                     }
-                    
-                    const statusColor = o.status === 'Delivered' ? 'var(--success)' : o.status === 'Cancelled' ? '#ef4444' : 'var(--flipkart-blue)';
 
                     html += `
-                        <div class="order-card">
-                            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                                <div>
-                                    <h4 style="color:var(--dark)">${o.productName || 'Product Name'}</h4>
-                                    <p style="font-size:13px; color:var(--gray); margin:4px 0;">Size: ${o.size || 'N/A'} | Price: ₹${o.price}</p>
-                                    <p style="font-size:12px; margin-top:5px;">Status: <b style="color:${statusColor}">${o.status || 'Pending'}</b></p>
-                                </div>
-                                <div style="text-align:right">
-                                    <span style="font-size:10px; color:var(--gray)">ID: ${docId.substring(0,8)}</span>
-                                </div>
+                    <div class="order-card" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <img src="${orderImgUrl}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 12px; border: 1px solid #f0f0f0;" onerror="this.src='https://via.placeholder.com/150'">
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; font-size: 15px; color: var(--dark); line-height: 1.4;">${o.productName || 'Product Name Not Found'}</h4>
+                                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">₹${o.price || 0} | Status: <b style="color: var(--flipkart-blue);">${o.status || 'Pending'}</b></p>
                             </div>
-                            
-                            <div style="background:#f8fafc; padding:10px; border-radius:10px; margin-top:10px; font-size:12px;">
-                                <p><strong>Customer:</strong> ${o.customerName || 'N/A'}</p>
-                                <p><strong>Phone:</strong> ${o.customerPhone || 'N/A'}</p>
-                                <p><strong>Address:</strong> ${o.address || 'N/A'}</p>
-                            </div>
-
-                            <div style="display:flex; gap:10px; margin-top:15px; border-top:1px solid #f1f5f9; padding-top:15px;">
-                                <button class="btn-main" style="padding:8px; font-size:12px; margin:0; background:#e0f2fe; color:#0369a1; box-shadow:none;" onclick="updateStatus('${docId}','Shipped')">Mark Shipped</button>
-                                <button class="btn-main" style="padding:8px; font-size:12px; margin:0; background:#dcfce7; color:#15803d; box-shadow:none;" onclick="updateStatus('${docId}','Delivered')">Mark Delivered</button>
-                            </div>
-                        </div>`;
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:5px;">
+                            <button class="btn-main" style="padding:10px; font-size:12px; margin:0; background:#e0f2fe; color:#0369a1; box-shadow:none; flex:1;" onclick="updateStatus('${docSnap.id}','Shipped')">Mark Shipped</button>
+                            <button class="btn-main" style="padding:10px; font-size:12px; margin:0; background:#dcfce7; color:#15803d; box-shadow:none; flex:1;" onclick="updateStatus('${docSnap.id}','Delivered')">Mark Delivered</button>
+                        </div>
+                    </div>`;
                 });
-                
-                document.getElementById('totalPayoutAmt').innerText = "₹" + Math.floor(earnings);
+                document.getElementById('totalPayoutAmt').innerText = "₹" + earnings.toFixed(0);
                 document.getElementById('ordersList').innerHTML = html || "<div style='text-align:center; padding:30px; color:#94a3b8'>No orders found yet.</div>";
             });
         }
 
-        window.updateStatus = async (id, s) => { 
-            try {
-                const orderRef = doc(db, "orders", id);
-                await updateDoc(orderRef, { status: s });
-            } catch(e) {
-                alert("Error updating status: " + e.message);
-            }
-        };
+        window.updateStatus = async (id, s) => { await updateDoc(doc(db, "orders", id), { status: s }); };
         
         window.updateBankDetails = async () => {
-            try {
-                await updateDoc(doc(db, "sellers", sellerId), {
-                    bankDetails: { 
-                        holder: document.getElementById('accHolder').value, 
-                        num: document.getElementById('accNumber').value,
-                        bank: document.getElementById('bankName').value,
-                        ifsc: document.getElementById('ifscCode').value
-                    }
-                });
-                alert("Bank Details Saved!");
-            } catch(e) {
-                alert("Error: " + e.message);
-            }
+            await updateDoc(doc(db, "sellers", sellerId), {
+                bankDetails: { holder: document.getElementById('accHolder').value, num: document.getElementById('accNumber').value }
+            });
+            alert("Bank Details Saved!");
         };
     </script>
 </body>
