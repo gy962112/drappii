@@ -8,28 +8,31 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
         :root { --accent: #9f2089; --accent-gradient: linear-gradient(135deg, #9f2089 0%, #ff5e9e 100%); --glass: rgba(248, 235, 255, 0.8); --bg-page: #fdf8ff; --text-main: #2d0c28; --text-muted: #8e6d8a; --card-radius: 32px; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background: var(--bg-page); color: var(--text-main); padding-bottom: 120px; }
         header { background: var(--glass); backdrop-filter: blur(20px); padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; position: fixed; top: 0; width: 100%; z-index: 1000; border-bottom: 1px solid rgba(159, 32, 137, 0.08); }
         .back-btn { font-size: 20px; color: var(--accent); cursor: pointer; }
-        .image-gallery { background: #fff; width: 100%; height: 75vh; overflow: hidden; position: relative; display: flex; }
-        .slider-container { display: flex; width: 100%; height: 100%; overflow-x: scroll; scroll-snap-type: x mandatory; scroll-behavior: smooth; }
+        .image-gallery { background: #fff; width: 100%; height: 75vh; overflow: hidden; margin-top: 0; position: relative; display: flex; }
+        .slider-container { display: flex; width: 100%; height: 100%; overflow-x: scroll; scroll-snap-type: x mandatory; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
+        .slider-container::-webkit-scrollbar { display: none; }
         .slider-item { min-width: 100%; height: 100%; scroll-snap-align: start; }
-        .slider-item img { width: 100%; height: 100%; object-fit: contain; }
+        .slider-item img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
         .slider-dots { position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; z-index: 20; }
-        .dot { width: 6px; height: 6px; background: rgba(159, 32, 137, 0.2); border-radius: 50%; }
+        .dot { width: 6px; height: 6px; background: rgba(159, 32, 137, 0.2); border-radius: 50%; transition: 0.3s; }
         .dot.active { width: 22px; border-radius: 10px; background: var(--accent); }
-        .luxe-card { background: #fff; padding: 30px 25px; border-radius: var(--card-radius) var(--card-radius) 0 0; margin-top: -35px; position: relative; z-index: 10; box-shadow: 0 -15px 40px rgba(159, 32, 137, 0.05); }
-        .p-title { font-size: 22px; font-weight: 800; margin-bottom: 12px; }
+        .luxe-card { background: #fff; padding: 30px 25px; border-radius: var(--card-radius) var(--card-radius) 0 0; margin-top: -35px; position: relative; z-index: 10; box-shadow: 0 -15px 40px rgba(159, 32, 137, 0.05); border: 1px solid rgba(159, 32, 137, 0.03); }
+        .p-title { font-size: 22px; font-weight: 800; color: var(--text-main); line-height: 1.3; margin-bottom: 12px; }
         .price-row { display: flex; align-items: center; gap: 12px; margin-bottom: 25px; }
         .current-price { font-size: 30px; font-weight: 800; }
         .mrp { font-size: 16px; text-decoration: line-through; color: var(--text-muted); }
         .discount-pct { font-size: 13px; color: #fff; font-weight: 800; background: var(--accent-gradient); padding: 5px 12px; border-radius: 12px; }
-        .section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; color: var(--accent); margin-bottom: 15px; }
-        /* Variant Thumbnails */
-        .variant-thumbnails { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; }
-        .v-thumb { width: 60px; height: 75px; border-radius: 10px; border: 2px solid #eee; cursor: pointer; object-fit: cover; }
-        .v-thumb.active { border-color: var(--accent); }
+        .section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 15px; margin-top: 10px; }
+        
+        /* UPDATED: Color Selector (Thumbnail Grid) */
+        .color-chips { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .color-thumb { width: 60px; height: 75px; border-radius: 10px; border: 2px solid #eee; cursor: pointer; object-fit: cover; transition: 0.3s; }
+        .color-thumb.selected { border-color: var(--accent); transform: scale(1.05); }
+
         .variant-chips { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
         .chip { min-width: 60px; text-align: center; border: 1.5px solid rgba(159, 32, 137, 0.1); padding: 10px; border-radius: 15px; font-size: 13px; font-weight: 700; cursor: pointer; }
         .chip.selected { border-color: var(--accent); color: #fff; background: var(--accent); }
@@ -41,11 +44,13 @@
         .sim-price { font-size: 14px; font-weight: 800; }
         .sticky-footer { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 92%; max-width: 500px; background: rgba(45, 12, 40, 0.95); display: grid; grid-template-columns: 1fr 1fr; padding: 12px; gap: 12px; border-radius: 26px; z-index: 1000; }
         .btn-footer { padding: 16px; border: none; border-radius: 20px; font-size: 15px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .cart-btn { background: rgba(255,255,255,0.1); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+        .buy-btn { background: #fff; color: #2d0c28; }
     </style>
 </head>
 <body>
     <header>
-        <i class="fa-solid fa-chevron-left back-btn" onclick="history.back()"></i>
+        <i class="fa-solid fa-chevron-left back-btn" onclick="location.href='index.html'"></i>
         <a href="cart.html" style="color:var(--text-main); font-size:18px;"><i class="fa-solid fa-bag-shopping"></i></a>
     </header>
 
@@ -55,17 +60,18 @@
     </div>
 
     <div class="luxe-card">
-        <h1 id="pName" class="p-title">Drapii Luxe</h1>
+        <h1 id="pName" class="p-title">Drapii Luxe Collection</h1>
         <div class="price-row">
             <span id="pPrice" class="current-price">₹--</span>
             <span id="pMrp" class="mrp">₹--</span>
             <span id="pDisc" class="discount-pct">--% OFF</span>
         </div>
 
-        <div class="section-title">More Colors</div>
-        <div class="variant-thumbnails" id="variantList"></div>
+        <div class="section-title">Select Color</div>
+        <div class="color-chips" id="colorList">
+            </div>
 
-        <div class="section-title">Size</div>
+        <div class="section-title">Selection Size</div>
         <div id="sizeList" class="variant-chips"></div>
 
         <div class="section-title">Description</div>
@@ -76,13 +82,13 @@
     </div>
 
     <div class="sticky-footer">
-        <button class="btn-footer" style="background:rgba(255,255,255,0.1); color:#fff;" onclick="addToCart(false)">Bag</button>
-        <button class="btn-footer" style="background:#fff; color:#2d0c28;" onclick="addToCart(true)">Buy Now</button>
+        <button class="btn-footer cart-btn" onclick="addToCart(false)">Bag</button>
+        <button class="btn-footer buy-btn" onclick="addToCart(true)">Buy Now</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, doc, getDoc, collection, getDocs, query, where, limit, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, doc, getDoc, collection, getDocs, query, where, limit, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = { apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q", authDomain: "fashora-flipkart.firebaseapp.com", projectId: "fashora-flipkart", storageBucket: "fashora-flipkart.firebasestorage.app", messagingSenderId: "383843603520", appId: "1:383843603520:web:729cb5ac9437eb7b1cbba5" };
@@ -90,28 +96,21 @@
         const auth = getAuth();
 
         const id = new URLSearchParams(window.location.search).get('id');
-        let pData = null;
-
         async function load() {
             const snap = await getDoc(doc(db, "products", id));
             if(snap.exists()){
-                pData = snap.data();
-                document.getElementById('pName').innerText = pData.name;
-                document.getElementById('pPrice').innerText = "₹" + pData.price;
-                document.getElementById('pMrp').innerText = "₹" + Math.round(pData.price * 1.35);
-                document.getElementById('pDesc').innerText = pData.description;
+                const d = snap.data();
+                document.getElementById('pName').innerText = d.name;
+                document.getElementById('pPrice').innerText = "₹" + d.price;
+                document.getElementById('pDesc').innerText = d.description;
+                document.getElementById('pMrp').innerText = "₹" + Math.round(d.price * 1.35);
+                document.getElementById('imageSlider').innerHTML = d.image.split(',').map(u => `<div class="slider-item"><img src="${u.trim()}"></div>`).join('');
                 
-                // Images
-                const imgs = pData.image.split(',');
-                document.getElementById('imageSlider').innerHTML = imgs.map(u => `<div class="slider-item"><img src="${u.trim()}"></div>`).join('');
-                
-                // Variants (Color Thumbnails)
-                if(pData.variants) {
-                    document.getElementById('variantList').innerHTML = pData.variants.split(',').map(v => `<img src="${v.trim()}" class="v-thumb">`).join('');
+                // Load Variants as Thumbnails
+                if(d.variants) {
+                    document.getElementById('colorList').innerHTML = d.variants.split(',').map(v => `<img src="${v.trim()}" class="color-thumb" onclick="location.href='product.html?id=${id}'">`).join('');
                 }
-                
-                // Sizes
-                document.getElementById('sizeList').innerHTML = pData.sizes.map(s => `<div class="chip" onclick="this.classList.toggle('selected')">${s}</div>`).join('');
+                document.getElementById('sizeList').innerHTML = d.sizes.map(s => `<div class="chip" onclick="this.classList.toggle('selected')">${s}</div>`).join('');
             }
         }
         load();
