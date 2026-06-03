@@ -21,13 +21,11 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Force Android SDK 34 (Fix Version Error)
+      - name: Fix Missing AppCompat Version Variable
         run: |
-          # Yeh command pure project mein jahan bhi compile ya target SDK 33 hoga use automatically 34 kar degi
-          find . -name "build.gradle" -o -name "variables.gradle" | xargs sed -i 's/compileSdkVersion = 33/compileSdkVersion = 34/g' 2>/dev/null || true
-          find . -name "build.gradle" -o -name "variables.gradle" | xargs sed -i 's/targetSdkVersion = 33/targetSdkVersion = 34/g' 2>/dev/null || true
-          find . -name "build.gradle" -o -name "variables.gradle" | xargs sed -i 's/compileSdk 33/compileSdk 34/g' 2>/dev/null || true
-          find . -name "build.gradle" -o -name "variables.gradle" | xargs sed -i 's/targetSdk 33/targetSdk 34/g' 2>/dev/null || true
+          # Yeh command direct app/build.gradle mein missing variable ko stable version se replace kar degi
+          sed -i 's/\$androidxAppCompatVersion/1.6.1/g' android/app/build.gradle || true
+          sed -i 's/androidxAppCompatVersion/1.6.1/g' android/app/build.gradle || true
 
       - name: Build with Gradle
         run: |
