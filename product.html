@@ -29,8 +29,9 @@
         }
         .back-btn { font-size: 20px; color: var(--accent); cursor: pointer; }
 
+        /* Full Image View - Flipkart Style */
         .image-gallery { 
-            background: #fff; width: 100%; height: 75vh;
+            background: #fff; width: 100%; height: 75vh; /* Fix for full image height */
             overflow: hidden; margin-top: 0; position: relative;
             display: flex;
         }
@@ -41,7 +42,7 @@
         }
         .slider-container::-webkit-scrollbar { display: none; }
         .slider-item { min-width: 100%; height: 100%; scroll-snap-align: start; }
-        .slider-item img { width: 100%; height: 100%; object-fit: contain; background: #fff; }
+        .slider-item img { width: 100%; height: 100%; object-fit: contain; background: #fff; } /* 'contain' ensures full image is visible */
         
         .slider-dots {
             position: absolute; bottom: 50px; left: 50%; transform: translateX(-50%);
@@ -69,13 +70,18 @@
 
         .section-title { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 15px; margin-top: 10px; }
         
-        /* Thumbnail Color Selector */
-        .color-chips { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; }
-        .color-thumb { 
-            width: 60px; height: 75px; border-radius: 10px; border: 2px solid #eee; 
-            cursor: pointer; transition: 0.3s; object-fit: cover;
+        /* Color Selector */
+        .color-chips { display: flex; gap: 10px; margin-bottom: 20px; }
+        .color-circle { 
+            width: 35px; height: 35px; border-radius: 50%; border: 2px solid #eee; 
+            cursor: pointer; transition: 0.3s; position: relative;
         }
-        .color-thumb.selected { border-color: var(--accent); transform: scale(1.05); }
+        .color-circle.selected { border-color: var(--accent); transform: scale(1.1); }
+        .color-circle.selected::after {
+            content: "\f00c"; font-family: "Font Awesome 6 Free"; font-weight: 900;
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; font-size: 12px; text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
 
         .variant-chips { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
         .chip { 
@@ -84,6 +90,7 @@
         }
         .chip.selected { border-color: var(--accent); color: #fff; background: var(--accent); }
 
+        /* Similar Products Grid */
         .similar-grid { 
             display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 15px 0;
         }
@@ -143,7 +150,10 @@
 
         <div class="section-title">Select Color</div>
         <div class="color-chips" id="colorList">
-            </div>
+            <div class="color-circle selected" style="background:#2d0c28" onclick="selectColor(this)"></div>
+            <div class="color-circle" style="background:#9f2089" onclick="selectColor(this)"></div>
+            <div class="color-circle" style="background:#555" onclick="selectColor(this)"></div>
+        </div>
 
         <div class="section-title">Selection Size</div>
         <div id="sizeList" class="variant-chips"></div>
@@ -201,6 +211,11 @@
             selectedSize = el.innerText;
         };
 
+        window.selectColor = (el) => {
+            document.querySelectorAll('.color-circle').forEach(c => c.classList.remove('selected'));
+            el.classList.add('selected');
+        };
+
         async function loadProduct() {
             if (!productId) { window.location.href = 'index.html'; return; }
             try {
@@ -227,15 +242,6 @@
                     const mrp = Math.round((productData.price || 0) * 1.35);
                     document.getElementById('pMrp').innerText = "₹" + mrp.toLocaleString();
                     document.getElementById('pDisc').innerText = "35% OFF";
-
-                    // Load Color Thumbnails (If you have a 'colorImages' field in your product document)
-                    if(productData.colorImages) {
-                        let colorHtml = "";
-                        productData.colorImages.split(',').forEach(url => {
-                            colorHtml += `<img src="${url.trim()}" class="color-thumb" onclick="this.classList.toggle('selected')">`;
-                        });
-                        document.getElementById('colorList').innerHTML = colorHtml;
-                    }
 
                     if(productData.sizes) {
                         let sizeHtml = "";
