@@ -17,15 +17,10 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+          cache: 'gradle' # Yeh build process ko safe aur fast rakhega
 
       - name: Install Dependencies
         run: npm install
-
-      - name: Fix Missing AppCompat Version Variable
-        run: |
-          # Yeh command direct app/build.gradle mein missing variable ko stable version se replace kar degi
-          sed -i 's/\$androidxAppCompatVersion/1.6.1/g' android/app/build.gradle || true
-          sed -i 's/androidxAppCompatVersion/1.6.1/g' android/app/build.gradle || true
 
       - name: Build with Gradle
         run: |
@@ -33,3 +28,9 @@ jobs:
           chmod +x gradlew
           ./gradlew clean
           ./gradlew assembleRelease --no-daemon -x lint -x test
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Drapii-App-APK
+          path: android/app/build/outputs/apk/release/*.apk
