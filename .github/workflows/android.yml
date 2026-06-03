@@ -24,7 +24,6 @@ jobs:
       - name: Force Update Gradle Wrapper
         run: |
           cd android
-          # Yeh command bina aapki files ko chhuye cloud par gradle upgrade kar degi
           gradle wrapper --gradle-version 8.2 --distribution-type bin
 
       - name: Build with Gradle
