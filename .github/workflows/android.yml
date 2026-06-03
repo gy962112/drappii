@@ -12,16 +12,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup JDK 21
+      - name: Setup JDK 17
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
+          java-version: '17' # Java 17 par downgrade kiya taaki purane gradle scripts crash na hon
           distribution: 'temurin'
 
-      - name: Setup Gradle Latest
+      - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.2' # Yeh bina kisi command ke seedhe automatic gradle upgrade kar dega
+          gradle-version: '8.0' # Stable gradle version jo version 65 wala lafda nahi karega
 
       - name: Install Dependencies
         run: npm install
