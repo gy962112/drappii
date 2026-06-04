@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Warehouse Panel | Drapii Luxe</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
@@ -28,7 +29,6 @@
             padding: 40px 20px; 
         }
 
-        /* Desktop Luxury Fix */
         .container, #authSection {
             background: #ffffff;
             border-radius: 24px;
@@ -84,7 +84,6 @@
         .listing-section { background: #fff; padding: 25px; border-radius: 20px; border: 1px solid #f0f0f0; margin-bottom: 25px; }
         .section-title { font-size: 13px; color: var(--flipkart-blue); font-weight: 800; margin-bottom: 20px; border-left: 4px solid var(--flipkart-blue); padding-left: 12px; letter-spacing: 1px; }
 
-        /* Scrollbar styling */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
@@ -287,6 +286,11 @@
         import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, onSnapshot, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
+        // Initialize EmailJS
+        (function(){
+            emailjs.init("5O-73kY-iwT7gFHHb"); 
+        })();
+
         const firebaseConfig = { 
             apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q", 
             authDomain: "fashora-flipkart.firebaseapp.com", 
@@ -348,7 +352,7 @@
                     sellerId = user.uid;
                     const d = sDoc.data();
                     sellerCity = d.warehouseCity;
-                    sellerEmail = d.email; // Email store kiya
+                    sellerEmail = d.email; 
                     document.getElementById('welcomeName').innerText = d.warehouseName;
                     document.getElementById('displayWhCity').innerText = sellerCity;
                     document.getElementById('displayWhImg').src = d.warehouseImg;
@@ -447,6 +451,7 @@
 
         window.uploadProduct = async () => {
             const btn = document.getElementById('uploadBtn');
+            const productName = document.getElementById('pName').value;
             btn.disabled = true; btn.innerText = "Launching...";
             try {
                 const file = document.getElementById('pImg').files[0];
@@ -483,7 +488,7 @@
                 const variantsArray = rawVariants ? rawVariants.split(',').map(item => item.trim()).filter(item => item !== "") : [];
 
                 await addDoc(collection(db, "products"), {
-                    name: document.getElementById('pName').value,
+                    name: productName,
                     brand: document.getElementById('pBrand').value,
                     category: finalCategory,
                     categoryDetails: categoryMetadata,
@@ -495,12 +500,21 @@
                     sizes: selectedSizes,
                     similarProducts: variantsArray,
                     sellerId: sellerId,
-                    sellerEmail: sellerEmail, // Yaha email add kar diya
+                    sellerEmail: sellerEmail,
                     warehouseCity: sellerCity,
                     timestamp: Date.now(),
                     desc: document.getElementById('pDesc').value || ""
                 });
-                alert("Product Launched!"); location.reload();
+
+                // Email Notification
+                await emailjs.send("service_vzgr3v6", "template_5cuk42m", {
+                    to_email: sellerEmail,
+                    product_name: productName,
+                    message: "Aapka naya product Drapii Luxe par live ho gaya hai!"
+                });
+
+                alert("Product Launched & Notification Sent!"); 
+                location.reload();
             } catch (e) { alert(e.message); btn.disabled = false; btn.innerText = "Launch Product"; }
         };
 
