@@ -303,6 +303,7 @@
 
         let sellerId = "";
         let sellerCity = ""; 
+        let sellerEmail = "";
         let selectedSizes = [];
 
         window.login = async () => {
@@ -347,6 +348,7 @@
                     sellerId = user.uid;
                     const d = sDoc.data();
                     sellerCity = d.warehouseCity;
+                    sellerEmail = d.email; // Email store kiya
                     document.getElementById('welcomeName').innerText = d.warehouseName;
                     document.getElementById('displayWhCity').innerText = sellerCity;
                     document.getElementById('displayWhImg').src = d.warehouseImg;
@@ -373,7 +375,6 @@
         window.toggleSize = (el) => { el.classList.toggle('selected'); const s = el.innerText; selectedSizes.includes(s) ? selectedSizes = selectedSizes.filter(x=>x!==s) : selectedSizes.push(s); };
         window.checkNewCity = (val) => { document.getElementById('newCityInput').classList.toggle('hidden', val !== 'NEW_CITY'); };
         
-        // Dynamic Fields Based on Selection
         window.checkNewCat = (val) => { 
             document.getElementById('newCatInput').classList.toggle('hidden', val !== 'NEW'); 
             
@@ -381,7 +382,6 @@
             const sizeSelectionBlock = document.getElementById('sizeSelectionBlock');
             customFieldsContainer.innerHTML = ""; 
 
-            // Show size block only for clothing like Shirt, Kurti, Western Wear
             if (val === "Shirt" || val === "Kurti" || val === "Western" || val === "Child") {
                 sizeSelectionBlock.style.display = "block";
             } else {
@@ -390,7 +390,6 @@
                 document.querySelectorAll('.size-chip').forEach(el => el.classList.remove('selected'));
             }
 
-            // Category Specific Fields Condition
             if(val === "Pant") {
                 customFieldsContainer.innerHTML = `
                     <label>Waist Size (Kamar in Inches)</label>
@@ -461,7 +460,6 @@
                 const chosenCategory = document.getElementById('pCategory').value;
                 const finalCategory = chosenCategory === 'NEW' ? document.getElementById('newCatInput').value : chosenCategory;
 
-                // Dynamic Category Extra Metadata Collection
                 let categoryMetadata = {};
                 if(chosenCategory === "Pant") {
                     categoryMetadata.waist = document.getElementById('pWaist') ? document.getElementById('pWaist').value : "";
@@ -481,7 +479,6 @@
                     categoryMetadata.jewelleryType = document.getElementById('jType') ? document.getElementById('jType').value : "";
                 }
 
-                // Split variant URLs/IDs by comma and clean spaces
                 const rawVariants = document.getElementById('pSimilarProducts').value;
                 const variantsArray = rawVariants ? rawVariants.split(',').map(item => item.trim()).filter(item => item !== "") : [];
 
@@ -498,6 +495,7 @@
                     sizes: selectedSizes,
                     similarProducts: variantsArray,
                     sellerId: sellerId,
+                    sellerEmail: sellerEmail, // Yaha email add kar diya
                     warehouseCity: sellerCity,
                     timestamp: Date.now(),
                     desc: document.getElementById('pDesc').value || ""
