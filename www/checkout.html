@@ -177,6 +177,23 @@
                 }
 
                 if (!sId) { throw new Error("Seller information missing. Order cannot be routed."); }
+                
+                // --- INTEGRATION: SEND NOTIFICATION TO GOOGLE SHEET ---
+                try {
+                    fetch("https://script.google.com/macros/s/AKfycbxegXrEY5LxuMoNf1SvcNDApxc8VXipqUgjH6uYfIbJ43AICzF9R8xJOCSGlmKK8RVZeA/exec", {
+                        method: "POST",
+                        mode: "no-cors",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            orderId: "ORD-" + Date.now(),
+                            productName: checkoutProduct.name,
+                            customerName: document.getElementById('cust-name').value,
+                            customerPhone: document.getElementById('cust-phone').value,
+                            price: Number(checkoutProduct.price),
+                            sellerEmail: "gy962112@gmail.com"
+                        })
+                    });
+                } catch(e) { console.log("Notification send failed, but order saved."); }
 
                 await addDoc(collection(db, "orders"), {
                     userId: currentUID,
