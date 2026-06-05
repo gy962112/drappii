@@ -178,7 +178,7 @@
 
         <div class="auth-tabs" style="background:#f8fafc; border:1px solid #e2e8f0; padding: 8px;">
             <button class="auth-tab active" id="addTab" onclick="switchDash('add')"><i class="fa-solid fa-plus-circle"></i> Add Product</button>
-            <button class="auth-tab" id="orderTab" onclick="switchDash('orders')"><i class="fa-solid fa- truck-fast"></i> Live Orders</button>
+            <button class="auth-tab" id="orderTab" onclick="switchDash('orders')"><i class="fa-solid fa-truck-fast"></i> Live Orders</button>
             <button class="auth-tab" id="payTab" onclick="switchDash('pay')"><i class="fa-solid fa-bank"></i> Bank Settings</button>
         </div>
 
@@ -208,10 +208,14 @@
                     <option value="Suits">Unstitched Suits</option>
                     <option value="Western">Western Wear</option>
                     <option value="Jewellery">Jewellery & Acc.</option>
+                    <option value="Books">Books</option>
                     <option value="NEW" style="color:var(--pink); font-weight:bold;">+ Add New Category</option>
                 </select>
                 <input type="text" id="newCatInput" class="hidden" placeholder="Enter New Category Name">
                 <div id="catSpecifics" class="hidden dynamic-specs"></div>
+                
+                <div id="customCategoryFields"></div>
+
                 <label>Brand Name</label>
                 <input type="text" id="pBrand" placeholder="Brand Name (e.g. Drapii Luxe)">
                 <label>Product Title</label>
@@ -220,28 +224,21 @@
                 <textarea id="pDesc" placeholder="Description (Bullet points recommended)" style="height: 100px;"></textarea>
             </div>
 
-            <div class="listing-section">
-                <div class="section-title">VARIATIONS (SIZES & COLORS)</div>
-                <label>Available Sizes</label>
-                <div class="size-chips" id="sizeContainer">
-                    <div class="size-chip" onclick="toggleSize(this)">S</div>
-                    <div class="size-chip" onclick="toggleSize(this)">M</div>
-                    <div class="size-chip" onclick="toggleSize(this)">L</div>
-                    <div class="size-chip" onclick="toggleSize(this)">XL</div>
-                    <div class="size-chip" onclick="toggleSize(this)">XXL</div>
-                    <div class="size-chip" onclick="toggleSize(this)">Free Size</div>
+            <div class="listing-section" id="variationSection">
+                <div class="section-title">VARIATIONS (SIZES & SIMILAR PRODUCTS)</div>
+                <div id="sizeSelectionBlock">
+                    <label>Available Sizes</label>
+                    <div class="size-chips" id="sizeContainer">
+                        <div class="size-chip" onclick="toggleSize(this)">S</div>
+                        <div class="size-chip" onclick="toggleSize(this)">M</div>
+                        <div class="size-chip" onclick="toggleSize(this)">L</div>
+                        <div class="size-chip" onclick="toggleSize(this)">XL</div>
+                        <div class="size-chip" onclick="toggleSize(this)">XXL</div>
+                        <div class="size-chip" onclick="toggleSize(this)">Free Size</div>
+                    </div>
                 </div>
-                <label>Available Colors</label>
-                <div class="color-chips" id="colorContainer">
-                    <div class="color-chip" onclick="toggleColor(this)">Red</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Blue</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Green</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Black</div>
-                    <div class="color-chip" onclick="toggleColor(this)">White</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Pink</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Yellow</div>
-                    <div class="color-chip" onclick="toggleColor(this)">Multi</div>
-                </div>
+                <label>Link Similar Products / Color Variants</label>
+                <textarea id="pSimilarProducts" placeholder="Paste variant Product IDs or Image URLs (Separate by comma ',') to show 'Similar Products' on checkout" style="height: 80px;"></textarea>
             </div>
 
             <div class="listing-section">
@@ -285,7 +282,6 @@
     </div>
 
     <script type="module">
-        // --- BAQI SAARA CODE SAME HAI (Wahi script jo aapne di thi) ---
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, onSnapshot, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -308,7 +304,6 @@
         let sellerId = "";
         let sellerCity = ""; 
         let selectedSizes = [];
-        let selectedColors = [];
 
         window.login = async () => {
             const email = document.getElementById('logEmail').value;
@@ -376,8 +371,65 @@
         };
 
         window.toggleSize = (el) => { el.classList.toggle('selected'); const s = el.innerText; selectedSizes.includes(s) ? selectedSizes = selectedSizes.filter(x=>x!==s) : selectedSizes.push(s); };
-        window.toggleColor = (el) => { el.classList.toggle('selected'); const c = el.innerText; selectedColors.includes(c) ? selectedColors = selectedColors.filter(x=>x!==c) : selectedColors.push(c); };
         window.checkNewCity = (val) => { document.getElementById('newCityInput').classList.toggle('hidden', val !== 'NEW_CITY'); };
+        
+        // Dynamic Fields Based on Selection
+        window.checkNewCat = (val) => { 
+            document.getElementById('newCatInput').classList.toggle('hidden', val !== 'NEW'); 
+            
+            const customFieldsContainer = document.getElementById('customCategoryFields');
+            const sizeSelectionBlock = document.getElementById('sizeSelectionBlock');
+            customFieldsContainer.innerHTML = ""; 
+
+            // Show size block only for clothing like Shirt, Kurti, Western Wear
+            if (val === "Shirt" || val === "Kurti" || val === "Western" || val === "Child") {
+                sizeSelectionBlock.style.display = "block";
+            } else {
+                sizeSelectionBlock.style.display = "none";
+                selectedSizes = []; 
+                document.querySelectorAll('.size-chip').forEach(el => el.classList.remove('selected'));
+            }
+
+            // Category Specific Fields Condition
+            if(val === "Pant") {
+                customFieldsContainer.innerHTML = `
+                    <label>Waist Size (Kamar in Inches)</label>
+                    <input type="text" id="pWaist" placeholder="e.g. 28, 30, 32, 34, 36">
+                    <label>Pant Length (Inches)</label>
+                    <input type="number" id="pLength" placeholder="e.g. 40">
+                    <label>Fabric Material</label>
+                    <input type="text" id="pFabric" placeholder="e.g. Cotton, Denim, Lycra">
+                `;
+            } else if(val === "Books") {
+                customFieldsContainer.innerHTML = `
+                    <label>Author Name</label>
+                    <input type="text" id="bAuthor" placeholder="e.g. Premchand">
+                    <label>ISBN Number</label>
+                    <input type="text" id="bIsbn" placeholder="13-digit ISBN number">
+                    <label>Publisher</label>
+                    <input type="text" id="bPublisher" placeholder="e.g. Penguin Books">
+                    <label>Language</label>
+                    <input type="text" id="bLanguage" placeholder="e.g. Hindi, English">
+                `;
+            } else if(val === "Saree") {
+                customFieldsContainer.innerHTML = `
+                    <label>Saree Length (Meters)</label>
+                    <input type="text" id="sLength" placeholder="e.g. 5.5 Meters">
+                    <label>Blouse Piece Included?</label>
+                    <select id="sBlouse"><option value="Yes">Yes</option><option value="No">No</option></select>
+                    <label>Work / Fabric Type</label>
+                    <input type="text" id="sWork" placeholder="e.g. Banarasi Silk, Georgette embroidered">
+                `;
+            } else if(val === "Jewellery") {
+                customFieldsContainer.innerHTML = `
+                    <label>Material Type</label>
+                    <input type="text" id="jMaterial" placeholder="e.g. Gold Plated, Silver, Brass">
+                    <label>Jewellery Type</label>
+                    <input type="text" id="jType" placeholder="e.g. Necklace, Earrings, Ring">
+                `;
+            }
+        };
+
         window.switchDash = (tab) => {
             ['addProductUI', 'ordersUI', 'payUI'].forEach(id => document.getElementById(id).classList.add('hidden'));
             ['addTab', 'orderTab', 'payTab'].forEach(id => document.getElementById(id).classList.remove('active'));
@@ -405,20 +457,50 @@
                     await uploadBytes(sRef, file);
                     finalUrl = await getDownloadURL(sRef);
                 }
+                
+                const chosenCategory = document.getElementById('pCategory').value;
+                const finalCategory = chosenCategory === 'NEW' ? document.getElementById('newCatInput').value : chosenCategory;
+
+                // Dynamic Category Extra Metadata Collection
+                let categoryMetadata = {};
+                if(chosenCategory === "Pant") {
+                    categoryMetadata.waist = document.getElementById('pWaist') ? document.getElementById('pWaist').value : "";
+                    categoryMetadata.length = document.getElementById('pLength') ? document.getElementById('pLength').value : "";
+                    categoryMetadata.fabric = document.getElementById('pFabric') ? document.getElementById('pFabric').value : "";
+                } else if(chosenCategory === "Books") {
+                    categoryMetadata.author = document.getElementById('bAuthor') ? document.getElementById('bAuthor').value : "";
+                    categoryMetadata.isbn = document.getElementById('bIsbn') ? document.getElementById('bIsbn').value : "";
+                    categoryMetadata.publisher = document.getElementById('bPublisher') ? document.getElementById('bPublisher').value : "";
+                    categoryMetadata.language = document.getElementById('bLanguage') ? document.getElementById('bLanguage').value : "";
+                } else if(chosenCategory === "Saree") {
+                    categoryMetadata.sareeLength = document.getElementById('sLength') ? document.getElementById('sLength').value : "";
+                    categoryMetadata.blouse = document.getElementById('sBlouse') ? document.getElementById('sBlouse').value : "";
+                    categoryMetadata.work = document.getElementById('sWork') ? document.getElementById('sWork').value : "";
+                } else if(chosenCategory === "Jewellery") {
+                    categoryMetadata.material = document.getElementById('jMaterial') ? document.getElementById('jMaterial').value : "";
+                    categoryMetadata.jewelleryType = document.getElementById('jType') ? document.getElementById('jType').value : "";
+                }
+
+                // Split variant URLs/IDs by comma and clean spaces
+                const rawVariants = document.getElementById('pSimilarProducts').value;
+                const variantsArray = rawVariants ? rawVariants.split(',').map(item => item.trim()).filter(item => item !== "") : [];
+
                 await addDoc(collection(db, "products"), {
                     name: document.getElementById('pName').value,
                     brand: document.getElementById('pBrand').value,
-                    category: document.getElementById('pCategory').value,
+                    category: finalCategory,
+                    categoryDetails: categoryMetadata,
                     mrp: Number(document.getElementById('pMrp').value),
                     price: Number(document.getElementById('pPrice').value),
                     stock: Number(document.getElementById('pStock').value),
                     sku: document.getElementById('pSku').value,
                     image: finalUrl,
                     sizes: selectedSizes,
-                    colors: selectedColors,
+                    similarProducts: variantsArray,
                     sellerId: sellerId,
                     warehouseCity: sellerCity,
-                    timestamp: Date.now()
+                    timestamp: Date.now(),
+                    desc: document.getElementById('pDesc').value || ""
                 });
                 alert("Product Launched!"); location.reload();
             } catch (e) { alert(e.message); btn.disabled = false; btn.innerText = "Launch Product"; }
@@ -430,11 +512,67 @@
                 let html = "";
                 snap.forEach(docSnap => {
                     const p = docSnap.data();
-                    html += `<div class="product-item"><img src="${p.image.split(',')[0]}"><div class="product-info"><h5>${p.name}</h5><p>₹${p.price}</p></div><button class="delete-btn" style="color: #ef4444; background: #fee2e2; border: none; padding: 10px; border-radius: 10px; cursor: pointer;" onclick="deleteMyProduct('${docSnap.id}')"><i class="fa-solid fa-trash"></i></button></div>`;
+                    html += `<div class="product-item">
+                                <img src="${p.image.split(',')[0]}">
+                                <div class="product-info" style="flex:1;">
+                                    <h5>${p.name}</h5>
+                                    <p>₹${p.price} | Stock: ${p.stock || 0}</p>
+                                </div>
+                                <div style="display:flex; gap:8px;">
+                                    <button class="edit-btn" style="color: #0284c7; background: #e0f2fe; border: none; padding: 10px; border-radius: 10px; cursor: pointer;" onclick="editMyProduct('${docSnap.id}', '${escapeHtml(p.name)}', ${p.mrp || 0}, ${p.price}, ${p.stock || 0}, '${escapeHtml(p.sku || '')}', '${escapeHtml(p.desc || '')}')">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button class="delete-btn" style="color: #ef4444; background: #fee2e2; border: none; padding: 10px; border-radius: 10px; cursor: pointer;" onclick="deleteMyProduct('${docSnap.id}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
+                             </div>`;
                 });
                 document.getElementById('sellerProductList').innerHTML = html || "<p>No products.</p>";
             });
         }
+
+        function escapeHtml(str) {
+            return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        window.editMyProduct = async (id, currentName, currentMrp, currentPrice, currentStock, currentSku, currentDesc) => {
+            const newName = prompt("Edit Product Title:", currentName);
+            if (newName === null) return; 
+
+            const newMrp = prompt("Edit MRP (₹):", currentMrp);
+            if (newMrp === null) return;
+
+            const newPrice = prompt("Edit Selling Price (₹):", currentPrice);
+            if (newPrice === null) return;
+
+            const newStock = prompt("Edit In Stock Quantity:", currentStock);
+            if (newStock === null) return;
+
+            const newSku = prompt("Edit SKU ID:", currentSku);
+            if (newSku === null) return;
+
+            const newDesc = prompt("Edit Description:", currentDesc);
+            if (newDesc === null) return;
+
+            if(!newName.trim() || isNaN(newMrp) || isNaN(newPrice) || isNaN(newStock)) {
+                return alert("Invalid details! Update failed.");
+            }
+
+            try {
+                await updateDoc(doc(db, "products", id), {
+                    name: newName.trim(),
+                    mrp: Number(newMrp),
+                    price: Number(newPrice),
+                    stock: Number(newStock),
+                    sku: newSku.trim(),
+                    desc: newDesc.trim()
+                });
+                alert("Product details updated successfully!");
+            } catch (e) {
+                alert("Update Error: " + e.message);
+            }
+        };
 
         window.deleteMyProduct = async (id) => { if(confirm("Delete?")) await deleteDoc(doc(db, "products", id)); };
 
@@ -446,7 +584,28 @@
                 snap.forEach(docSnap => {
                     const o = docSnap.data();
                     if(o.status === 'Delivered') earnings += o.price * 0.8;
-                    html += `<div class="order-card"><h4>${o.productName}</h4><p>₹${o.price} | Status: <b>${o.status}</b></p><div style="display:flex;gap:10px;margin-top:15px"><button class="btn-main" style="padding:8px;font-size:12px;margin:0; background:#e0f2fe; color:#0369a1; box-shadow:none;" onclick="updateStatus('${docSnap.id}','Shipped')">Mark Shipped</button><button class="btn-main" style="padding:8px;font-size:12px;margin:0;background:#dcfce7; color:#15803d; box-shadow:none;" onclick="updateStatus('${docSnap.id}','Delivered')">Mark Delivered</button></div></div>`;
+                    
+                    let rawImg = o.image || o.productImage || o.pImg || o.imgUrl || o.img || o.productImg || o.thumb || "";
+                    let orderImgUrl = 'https://via.placeholder.com/150';
+                    
+                    if(rawImg && String(rawImg).trim() !== "") {
+                        orderImgUrl = String(rawImg).split(',')[0].trim();
+                    }
+
+                    html += `
+                    <div class="order-card" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <img src="${orderImgUrl}" style="width: 70px; height: 70px; object-fit: cover; border-radius: 12px; border: 1px solid #f0f0f0;" onerror="this.src='https://via.placeholder.com/150'">
+                            <div style="flex: 1;">
+                                <h4 style="margin: 0; font-size: 15px; color: var(--dark); line-height: 1.4;">${o.productName || 'Product Name Not Found'}</h4>
+                                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">₹${o.price || 0} | Status: <b style="color: var(--flipkart-blue);">${o.status || 'Pending'}</b></p>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:5px;">
+                            <button class="btn-main" style="padding:10px; font-size:12px; margin:0; background:#e0f2fe; color:#0369a1; box-shadow:none; flex:1;" onclick="updateStatus('${docSnap.id}','Shipped')">Mark Shipped</button>
+                            <button class="btn-main" style="padding:10px; font-size:12px; margin:0; background:#dcfce7; color:#15803d; box-shadow:none; flex:1;" onclick="updateStatus('${docSnap.id}','Delivered')">Mark Delivered</button>
+                        </div>
+                    </div>`;
                 });
                 document.getElementById('totalPayoutAmt').innerText = "₹" + earnings.toFixed(0);
                 document.getElementById('ordersList').innerHTML = html || "<div style='text-align:center; padding:30px; color:#94a3b8'>No orders found yet.</div>";
