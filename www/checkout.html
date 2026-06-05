@@ -52,7 +52,7 @@
         <p style="margin-top: 20px; font-weight: 800; color: var(--accent);">SECURELY PROCESSING...</p>
     </div>
 
-    <div class="nav-header"><i class="fa-solid fa-chevron-left" onclick="history.back()"></i><span>Final Step</span></div>
+    <div class="nav-header"><i class="fa-solid fa-chevron-left" onclick="window.location.href='index.html'"></i><span>Final Step</span></div>
 
     <div class="container">
         <div id="product-summary" class="section-card"></div>
@@ -117,7 +117,11 @@
         });
 
         function initCheckout() {
-            if(!checkoutProduct) { alert("No product selected"); history.back(); return; }
+            if(!checkoutProduct) { 
+                alert("No product selected"); 
+                window.location.href = "account.html"; 
+                return; 
+            }
             document.getElementById('final-price').innerText = "₹" + checkoutProduct.price;
             document.getElementById('product-summary').innerHTML = `
                 <div class="wh-badge"><i class="fa-solid fa-shield-check"></i> Verified Elite Seller</div>
@@ -166,7 +170,6 @@
                 let sId = checkoutProduct.sellerId;
                 let sCity = checkoutProduct.warehouseCity || "Headquarters";
 
-                // RE-FETCH SELLER ID FROM FIREBASE TO BE 100% SURE
                 if (!sId && checkoutProduct.productId) {
                     const pRef = doc(db, "products", checkoutProduct.productId);
                     const pSnap = await getDoc(pRef);
@@ -178,7 +181,6 @@
 
                 if (!sId) { throw new Error("Seller information missing. Order cannot be routed."); }
                 
-                // --- INTEGRATION: SEND NOTIFICATION TO GOOGLE SHEET ---
                 try {
                     fetch("https://script.google.com/macros/s/AKfycbxegXrEY5LxuMoNf1SvcNDApxc8VXipqUgjH6uYfIbJ43AICzF9R8xJOCSGlmKK8RVZeA/exec", {
                         method: "POST",
@@ -200,7 +202,7 @@
                     sellerId: sId,
                     warehouseCity: sCity,
                     customerName: document.getElementById('cust-name').value,
-                    customerPhone: document.getElementById('cust-phone').value, // MATCHED WITH SELLER PANEL
+                    customerPhone: document.getElementById('cust-phone').value, 
                     address: document.getElementById('cust-address').value,
                     city: document.getElementById('cust-city').value,
                     pincode: document.getElementById('cust-pincode').value,
