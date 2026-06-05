@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Warehouse Panel | Drapii Luxe</title>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
@@ -29,6 +28,7 @@
             padding: 40px 20px; 
         }
 
+        /* Desktop Luxury Fix */
         .container, #authSection {
             background: #ffffff;
             border-radius: 24px;
@@ -84,6 +84,7 @@
         .listing-section { background: #fff; padding: 25px; border-radius: 20px; border: 1px solid #f0f0f0; margin-bottom: 25px; }
         .section-title { font-size: 13px; color: var(--flipkart-blue); font-weight: 800; margin-bottom: 20px; border-left: 4px solid var(--flipkart-blue); padding-left: 12px; letter-spacing: 1px; }
 
+        /* Scrollbar styling */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
@@ -286,11 +287,6 @@
         import { getFirestore, doc, setDoc, getDoc, collection, addDoc, query, where, onSnapshot, updateDoc, deleteDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-        // Initialize EmailJS
-        (function(){
-            emailjs.init("5O-73kY-iwT7gFHHb"); 
-        })();
-
         const firebaseConfig = { 
             apiKey: "AIzaSyAktuzpc6myYe-szK-GbTQdn_Iu0bYQW8Q", 
             authDomain: "fashora-flipkart.firebaseapp.com", 
@@ -307,7 +303,6 @@
 
         let sellerId = "";
         let sellerCity = ""; 
-        let sellerEmail = "";
         let selectedSizes = [];
 
         window.login = async () => {
@@ -352,7 +347,6 @@
                     sellerId = user.uid;
                     const d = sDoc.data();
                     sellerCity = d.warehouseCity;
-                    sellerEmail = d.email; 
                     document.getElementById('welcomeName').innerText = d.warehouseName;
                     document.getElementById('displayWhCity').innerText = sellerCity;
                     document.getElementById('displayWhImg').src = d.warehouseImg;
@@ -379,6 +373,7 @@
         window.toggleSize = (el) => { el.classList.toggle('selected'); const s = el.innerText; selectedSizes.includes(s) ? selectedSizes = selectedSizes.filter(x=>x!==s) : selectedSizes.push(s); };
         window.checkNewCity = (val) => { document.getElementById('newCityInput').classList.toggle('hidden', val !== 'NEW_CITY'); };
         
+        // Dynamic Fields Based on Selection
         window.checkNewCat = (val) => { 
             document.getElementById('newCatInput').classList.toggle('hidden', val !== 'NEW'); 
             
@@ -386,6 +381,7 @@
             const sizeSelectionBlock = document.getElementById('sizeSelectionBlock');
             customFieldsContainer.innerHTML = ""; 
 
+            // Show size block only for clothing like Shirt, Kurti, Western Wear
             if (val === "Shirt" || val === "Kurti" || val === "Western" || val === "Child") {
                 sizeSelectionBlock.style.display = "block";
             } else {
@@ -394,6 +390,7 @@
                 document.querySelectorAll('.size-chip').forEach(el => el.classList.remove('selected'));
             }
 
+            // Category Specific Fields Condition
             if(val === "Pant") {
                 customFieldsContainer.innerHTML = `
                     <label>Waist Size (Kamar in Inches)</label>
@@ -451,7 +448,6 @@
 
         window.uploadProduct = async () => {
             const btn = document.getElementById('uploadBtn');
-            const productName = document.getElementById('pName').value;
             btn.disabled = true; btn.innerText = "Launching...";
             try {
                 const file = document.getElementById('pImg').files[0];
@@ -465,6 +461,7 @@
                 const chosenCategory = document.getElementById('pCategory').value;
                 const finalCategory = chosenCategory === 'NEW' ? document.getElementById('newCatInput').value : chosenCategory;
 
+                // Dynamic Category Extra Metadata Collection
                 let categoryMetadata = {};
                 if(chosenCategory === "Pant") {
                     categoryMetadata.waist = document.getElementById('pWaist') ? document.getElementById('pWaist').value : "";
@@ -484,11 +481,12 @@
                     categoryMetadata.jewelleryType = document.getElementById('jType') ? document.getElementById('jType').value : "";
                 }
 
+                // Split variant URLs/IDs by comma and clean spaces
                 const rawVariants = document.getElementById('pSimilarProducts').value;
                 const variantsArray = rawVariants ? rawVariants.split(',').map(item => item.trim()).filter(item => item !== "") : [];
 
                 await addDoc(collection(db, "products"), {
-                    name: productName,
+                    name: document.getElementById('pName').value,
                     brand: document.getElementById('pBrand').value,
                     category: finalCategory,
                     categoryDetails: categoryMetadata,
@@ -500,21 +498,11 @@
                     sizes: selectedSizes,
                     similarProducts: variantsArray,
                     sellerId: sellerId,
-                    sellerEmail: sellerEmail,
                     warehouseCity: sellerCity,
                     timestamp: Date.now(),
                     desc: document.getElementById('pDesc').value || ""
                 });
-
-                // Email Notification
-                await emailjs.send("service_vzgr3v6", "template_5cuk42m", {
-                    to_email: sellerEmail,
-                    product_name: productName,
-                    message: "Aapka naya product Drapii Luxe par live ho gaya hai!"
-                });
-
-                alert("Product Launched & Notification Sent!"); 
-                location.reload();
+                alert("Product Launched!"); location.reload();
             } catch (e) { alert(e.message); btn.disabled = false; btn.innerText = "Launch Product"; }
         };
 
