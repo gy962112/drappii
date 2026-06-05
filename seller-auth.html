@@ -309,6 +309,7 @@
         let sellerCity = ""; 
         let sellerEmail = "";
         let selectedSizes = [];
+        let orderCount = 0; // Track order count to trigger notification
 
         window.login = async () => {
             const email = document.getElementById('logEmail').value;
@@ -591,6 +592,16 @@
         async function loadStats() {
             const q = query(collection(db, "orders"), where("sellerId", "==", sellerId));
             onSnapshot(q, (snap) => {
+                // Email Notification Logic for New Orders
+                if (orderCount > 0 && snap.size > orderCount) {
+                    emailjs.send("service_vzgr3v6", "template_5cuk42m", {
+                        to_email: sellerEmail,
+                        product_name: "Naya Order Aaya Hai!",
+                        message: "Aapko Drapii Luxe par ek naya order mila hai, jaldi check karein!"
+                    });
+                }
+                orderCount = snap.size;
+
                 document.getElementById('totalOrdersCount').innerText = snap.size;
                 let earnings = 0; let html = "";
                 snap.forEach(docSnap => {
