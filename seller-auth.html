@@ -310,7 +310,7 @@
         let sellerCity = ""; 
         let sellerEmail = "";
         let selectedSizes = [];
-        let orderCount = 0; // Track order count to trigger notification
+        let orderCount = 0;
 
         window.login = async () => {
             const email = document.getElementById('logEmail').value;
@@ -386,14 +386,34 @@
             
             const customFieldsContainer = document.getElementById('customCategoryFields');
             const sizeSelectionBlock = document.getElementById('sizeSelectionBlock');
+            const sizeContainer = document.getElementById('sizeContainer');
             customFieldsContainer.innerHTML = ""; 
+            selectedSizes = [];
 
-            if (val === "Shirt" || val === "Kurti" || val === "Western" || val === "Child" || val === "Footwear") {
+            if (val === "Shirt" || val === "Kurti" || val === "Western" || val === "Child" || val === "Footwear" || val === "Pant") {
                 sizeSelectionBlock.style.display = "block";
+                
+                if (val === "Footwear") {
+                    sizeContainer.innerHTML = `
+                        <div class="size-chip" onclick="toggleSize(this)">6</div>
+                        <div class="size-chip" onclick="toggleSize(this)">7</div>
+                        <div class="size-chip" onclick="toggleSize(this)">8</div>
+                        <div class="size-chip" onclick="toggleSize(this)">9</div>
+                        <div class="size-chip" onclick="toggleSize(this)">10</div>
+                        <div class="size-chip" onclick="toggleSize(this)">11</div>
+                    `;
+                } else {
+                    sizeContainer.innerHTML = `
+                        <div class="size-chip" onclick="toggleSize(this)">S</div>
+                        <div class="size-chip" onclick="toggleSize(this)">M</div>
+                        <div class="size-chip" onclick="toggleSize(this)">L</div>
+                        <div class="size-chip" onclick="toggleSize(this)">XL</div>
+                        <div class="size-chip" onclick="toggleSize(this)">XXL</div>
+                        <div class="size-chip" onclick="toggleSize(this)">Free Size</div>
+                    `;
+                }
             } else {
                 sizeSelectionBlock.style.display = "none";
-                selectedSizes = []; 
-                document.querySelectorAll('.size-chip').forEach(el => el.classList.remove('selected'));
             }
 
             if(val === "Pant") {
@@ -515,7 +535,6 @@
                     desc: document.getElementById('pDesc').value || ""
                 });
 
-                // Email Notification
                 await emailjs.send("service_vzgr3v6", "template_5cuk42m", {
                     to_email: sellerEmail,
                     product_name: productName,
@@ -600,7 +619,6 @@
         async function loadStats() {
             const q = query(collection(db, "orders"), where("sellerId", "==", sellerId));
             onSnapshot(q, (snap) => {
-                // Email Notification Logic for New Orders
                 if (orderCount > 0 && snap.size > orderCount) {
                     emailjs.send("service_vzgr3v6", "template_5cuk42m", {
                         to_email: sellerEmail,
